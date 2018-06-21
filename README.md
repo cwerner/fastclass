@@ -12,10 +12,10 @@ Usage: fastclass.py [OPTIONS] INFOLDER [OUTFILE]
 Options:
   -c, --copy         Copy files into class folder after completion  [default:
                      False]
-  -d, --delete TEXT  Exclude deleted files from output csv file  [default:
+  -d, --delete       Exclude deleted files from output csv file  [default:
                      True]
-  -e, --ext TEXT     Image file extention to look for  [default: jpg]
-  -w, --wipe TEXT    Wipe exiting output folders if copy is requested
+  -e, --ext          Image file extention to look for  [default: jpg]
+  -w, --wipe         Wipe exiting output folders if copy is requested
                      [default: False]
   -h, --help         Show this message and exit.
 

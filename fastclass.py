@@ -238,13 +238,13 @@ click.Context.get_usage = click.Context.get_help
                     default=False, show_default=True,
                     help='Copy files into class folder after completion')
 
-@click.option('-d', '--delete',  default=True, show_default=True,
+@click.option('-d', '--delete', is_flag=True, default=True, show_default=True,
                     help='Exclude deleted files from output csv file')
 
 @click.option('-e', '--ext',  default='jpg', show_default=True,
                     help='Image file extention to look for')
 
-@click.option('-w', '--wipe',  default=False, show_default=True,
+@click.option('-w', '--wipe',  is_flag=True, default=False, show_default=True,
                     help='Wipe exiting output folders if copy is requested')
 
 
