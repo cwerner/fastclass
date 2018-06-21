@@ -19,7 +19,10 @@ Use the buttons to navigate back and forth without changing\r
 the classification. The current classification of an image\r
 is given in the title bar (X indicated a mark for deletion).\r
 The counter in the titlebar gives number of classified images\r
-vs the total number in the input folder."""
+vs the total number in the input folder.\r
+
+In the output csv file 1,2 depcit class asignments, -1 indicates\r
+files marked for deletion (if not excluded with -d)."""
 
 
 class AppTk(tk.Frame):
@@ -245,14 +248,14 @@ click.Context.get_usage = click.Context.get_help
                     help='Image file extention to look for')
 
 @click.option('-w', '--wipe',  is_flag=True, default=False, show_default=True,
-                    help='Wipe exiting output folders if copy is requested')
+                    help='Wipe existing output folders if copy is requested')
 
 
 @click.argument('infolder', type=click.Path(exists=True), required=True)
 @click.argument('outfile', type=click.File('w'), required=False)
 
 def cli(infolder, outfile, copy, ext, delete, wipe):
-    """FastClass image classifier"""
+    """FastClass Image Classifier"""
 
     main(infolder, outfile, copy, ext, delete, wipe)
 
