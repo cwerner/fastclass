@@ -59,6 +59,8 @@ class AppTk(tk.Frame):
 
         self.index=-1
         
+        self.size = (299, 299)
+
         # basic setup
         self.setup()
 
@@ -194,7 +196,13 @@ class AppTk(tk.Frame):
             self.display_next()
             return
 
-        photoimage = ImageTk.PhotoImage(Image.open(f))
+        im = Image.open(f)
+        im.thumbnail(self.size, Image.ANTIALIAS)
+
+        bg = Image.new('RGBA', self.size, (255, 255, 255, 0))
+        bg.paste(im, (int((self.size[0] - im.size[0]) / 2), int((self.size[1] - im.size[1]) / 2)))
+
+        photoimage = ImageTk.PhotoImage(bg)
         self.Label.config(image=photoimage)
         self.Label.image=photoimage
         self.printSomething()
@@ -209,7 +217,13 @@ class AppTk(tk.Frame):
             self.display_next()
             return
 
-        photoimage = ImageTk.PhotoImage(Image.open(f))
+        im = Image.open(f)
+        im.thumbnail(self.size, Image.ANTIALIAS)
+
+        bg = Image.new('RGBA', self.size, (255, 255, 255, 0))
+        bg.paste(im, (int((self.size[0] - im.size[0]) / 2), int((self.size[1] - im.size[1]) / 2)))
+
+        photoimage = ImageTk.PhotoImage(bg)
         self.Label.config(image=photoimage)
         self.Label.image=photoimage
         self.printSomething()
