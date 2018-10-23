@@ -51,7 +51,7 @@ def crawl(DIR, KW, crawlers=['GOOGLE', 'BING', 'BAIDU']):
                                             storage={'root_dir': DIR+'.bing'})
             bing_crawler.crawl(keyword=KW, filters=None, offset=0, max_num=1000)
 
-        if c == 'BING':
+        if c == 'BAIDU':
             print('    -> Baidu')
             baidu_crawler = BaiduImageCrawler(log_level=logging.CRITICAL,
                                     storage={'root_dir': DIR+'.baidu'})
