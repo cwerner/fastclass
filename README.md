@@ -2,6 +2,10 @@
 A little set of tools to batch download images and weed through, delete and
 classify them into groups for building deep learning image datasets.
 
+## Installation
+
+*pip install git+https://github.com/cwerner/fastclass.git*
+
 The package currently contains the follwing tools:  
 
 ## Download images 
