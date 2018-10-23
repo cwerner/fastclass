@@ -25,7 +25,7 @@ Call the script from the commandline. If you omit any input parameters it
 will show you the help page.
 
 ```
-Usage: fc_download.py [OPTIONS] INFILE
+Usage: fcd [OPTIONS] INFILE
 
 Options:
   -c, --crawler [GOOGLE|BING|BAIDU]
@@ -40,7 +40,7 @@ Options:
   ...an easy way to crawl the net for images when building a dataset for
   conv nets.
 
-  Example: downloader.py -c GOOGLE -c BING -s 224 example/targets.csv
+  Example: fcd -c GOOGLE -c BING -s 224 example/targets.csv
 ```
 
 ## Clean image sets
@@ -53,7 +53,7 @@ Call the script from the commandline. If you omit any input parameters it
 will show you the help page.
 
 ```
-Usage: fc_clean.py [OPTIONS] INFOLDER [OUTFILE]
+Usage: fcc [OPTIONS] INFOLDER [OUTFILE]
 
   FastClass fc_clean
 
