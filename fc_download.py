@@ -124,10 +124,14 @@ def main(infile, size, crawler, outpath):
 
     classes = []
 
-    os.makedirs(outpath, exist_ok=True)
+    if os.path.isdir(outpath):
+        print(f'Directory "{outpath}" exists. Please specify another one using -o')
+        exit(-1)
+    else:
+        os.makedirs(outpath)
+        print(f'INFO: final dataset will be located in {outpath}')
 
-    BASEDIR='tmp'
-    basedir_ok = False
+    BASEDIR='tmp'; basedir_ok = False
     basedirs = [BASEDIR] + [f'{BASEDIR}.{i}' for i in range(10)]
     while basedir_ok == False and len(basedirs) > 0:
         try:
@@ -135,13 +139,13 @@ def main(infile, size, crawler, outpath):
             os.makedirs(bd)
             basedir_ok = True
         except OSError:
-            print(f'Directory {bd} exists...')
+            print(f'Directory "{bd}" exists...')
     
     if basedir_ok == False:
         print('Please check your local directory')
         exit(-1)
     else:
-        print(f'Download data into {bd}...')
+        print(f'Download data into "{bd}"...')
 
     for lcnt, line in enumerate(infile):
         if lcnt > 0:
