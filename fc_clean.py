@@ -246,14 +246,12 @@ def main(INFOLDER, OUTFILE, COPY, EXT, DEL, WIPE):
     app = AppTk(root, infolder=INFOLDER, outfile=OUTFILE, copy=COPY, file_ext=EXT, delete=DEL, wipe=WIPE) 
     app.grid(row=0,column=0)
 
-    # start of nasty hack to give app focus on a mac -----------------------------
-    from os import system
-    from platform import system as platform
-    if platform() == 'Darwin':  # How Mac OS X is identified by Python
-        system('''/usr/bin/osascript -e 'tell app "Finder" to set frontmost of process "Python" to true' ''')
-    # end of nasty hack to give app focus on a mac -----------------------------
 
     # start event loop
+    root.lift()
+    root.attributes('-topmost',True)
+    root.after_idle(root.attributes,'-topmost',False)
+
     root.mainloop()
 
 # Cli - command line arguments
