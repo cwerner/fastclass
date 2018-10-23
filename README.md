@@ -6,6 +6,9 @@ classify them into groups for building deep learning image datasets.
 
 *pip install git+https://github.com/cwerner/fastclass.git*
 
+The installer will also place the executables *fcc* (fc_clean.py) and *fcd* (fc_download.py)
+in your PATH.  
+
 The package currently contains the follwing tools:  
 
 ## Download images 
