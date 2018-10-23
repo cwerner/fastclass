@@ -21,9 +21,9 @@ from tqdm import tqdm
 EPILOG = """::: FastClass fc_download :::\r
 \r
 ...an easy way to crawl the net for images when building a\r
-dataset for conv nets.\r
+dataset for deep learning.\r
 \r
-Example: downloader.py -c GOOGLE -c BING -s 224 example/targets.csv
+Example: fcd -c GOOGLE -c BING -s 224 example/guitars.csv
 
 """
 
