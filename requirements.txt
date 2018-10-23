@@ -1,5 +1,2 @@
-click
-icrawler
-Pillow
-tqdm
-tkinter
+# "." uses requirements defined inside setup.py
+.

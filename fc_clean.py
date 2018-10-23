@@ -13,11 +13,11 @@ import shutil
 
 EPILOG = """::: FastClass fc_clean :::\r
 ...a fast way to cleanup/ sort your images when building a\r
-dataset for conv nets.\r
+dataset for deep learning.\r
 \r
 Note:\r
 In the application use the following keys:\r
-<1>, <2> for class assignments\r
+<1>, <2>, ... <9> for class assignments or quality ratings\r
 <d> to mark a deletion\r
 <x> to terminate the app/ write output\r
 \r
@@ -27,8 +27,8 @@ is given in the title bar (X indicated a mark for deletion).\r
 The counter in the titlebar gives number of classified images\r
 vs the total number in the input folder.\r
 
-In the output csv file 1,2 depcit class asignments, -1 indicates\r
-files marked for deletion (if not excluded with -d)."""
+In the output csv file 1,2 depcit class assignments/ ratings, 
+-1 indicates files marked for deletion (if not excluded with -d)."""
 
 
 class AppTk(tk.Frame):
