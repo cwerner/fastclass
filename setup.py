@@ -24,7 +24,6 @@ setup(
 
     packages = find_packages(),
     install_requires = requirements,
-    setup_requires   = setup_requirements,
     python_requires  = '>=3.6',
 
     description = "small tools to download and evaluate images for deep learning",
