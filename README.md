@@ -17,6 +17,9 @@ Use **fc_download.py** to crawl search engines (Google, Bing, Baidu) and pull al
 a defined set of queries. In addition, files are renamed, scaled and checked
 for duplicates.
 
+You provide queries and terms that should be excluded when naming the category folders. There
+is an example (guitars.csv) provided in the repository. 
+
 ### Usage
 Call the script from the commandline. If you omit any input parameters it 
 will show you the help page.
