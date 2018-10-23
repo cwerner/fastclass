@@ -33,30 +33,30 @@ def crawl(DIR, KW, crawlers=['GOOGLE', 'BING', 'BAIDU']):
     for c in crawlers:
         os.makedirs(DIR+'.'+c.lower(), exist_ok=True)
 
-    if c == 'GOOGLE':
-        print('    -> Google')
-        google_crawler = GoogleImageCrawler(
-            log_level=logging.CRITICAL,
-            feeder_threads=1,
-            parser_threads=1,
-            downloader_threads=4,
-            storage={'root_dir': DIR+'.google'})
+        if c == 'GOOGLE':
+            print('    -> Google')
+            google_crawler = GoogleImageCrawler(
+                log_level=logging.CRITICAL,
+                feeder_threads=1,
+                parser_threads=1,
+                downloader_threads=4,
+                storage={'root_dir': DIR+'.google'})
 
-        google_crawler.crawl(keyword=KW, offset=0, max_num=1000,
-                            min_size=(200,200), max_size=None, file_idx_offset=0)
-    if c == 'BING':
-        print('    -> Bing')
-        bing_crawler = BingImageCrawler(log_level=logging.CRITICAL,
-                                        downloader_threads=4,
-                                        storage={'root_dir': DIR+'.bing'})
-        bing_crawler.crawl(keyword=KW, filters=None, offset=0, max_num=1000)
+            google_crawler.crawl(keyword=KW, offset=0, max_num=1000,
+                                min_size=(200,200), max_size=None, file_idx_offset=0)
+        if c == 'BING':
+            print('    -> Bing')
+            bing_crawler = BingImageCrawler(log_level=logging.CRITICAL,
+                                            downloader_threads=4,
+                                            storage={'root_dir': DIR+'.bing'})
+            bing_crawler.crawl(keyword=KW, filters=None, offset=0, max_num=1000)
 
-    if c == 'BING':
-        print('    -> Baidu')
-        baidu_crawler = BaiduImageCrawler(log_level=logging.CRITICAL,
-                                storage={'root_dir': DIR+'.baidu'})
-        baidu_crawler.crawl(keyword=KW, offset=0, max_num=1000,
-                            min_size=(200,200), max_size=None)
+        if c == 'BING':
+            print('    -> Baidu')
+            baidu_crawler = BaiduImageCrawler(log_level=logging.CRITICAL,
+                                    storage={'root_dir': DIR+'.baidu'})
+            baidu_crawler.crawl(keyword=KW, offset=0, max_num=1000,
+                                min_size=(200,200), max_size=None)
 
 def hashfile(path, blocksize = 65536):
     afile = open(path, 'rb')
@@ -124,6 +124,9 @@ def main(infile, size, crawler, outpath):
 
     classes = []
 
+    if 'ALL' in crawler:
+        crawler = ['GOOGLE', 'BING', 'BAIDU']
+
     if os.path.isdir(outpath):
         print(f'Directory "{outpath}" exists. Please specify another one using -o')
         exit(-1)
@@ -188,8 +191,8 @@ click.Context.get_usage = click.Context.get_help
 
 @click.command(context_settings=CONTEXT_SETTINGS, epilog=EPILOG)
 
-@click.option('-c', '--crawler', default=['GOOGLE'], 
-                    type=click.Choice(['GOOGLE', 'BING', 'BAIDU']),
+@click.option('-c', '--crawler', default=['ALL'], 
+                    type=click.Choice(['ALL','GOOGLE', 'BING', 'BAIDU']),
                     show_default=True, multiple=True,
                     help='selection of crawler (multiple invocations supported)')
 
