@@ -46,5 +46,12 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
 
+    entry_points={
+        'console_scripts': [
+            'fcc=fc_clean:cli',
+            'fcd=fc_download:cli',
+        ],
+    },
+
     zip_safe = False,
 )
