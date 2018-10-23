@@ -126,8 +126,22 @@ def main(infile, size, crawler, outpath):
 
     os.makedirs(outpath, exist_ok=True)
 
-    BASEDIR='downloads'
-    os.makedirs(BASEDIR, exist_ok=True)
+    BASEDIR='tmp'
+    basedir_ok = False
+    basedirs = [BASEDIR] + [f'{BASEDIR}.{i}' for i in range(10)]
+    while basedir_ok == False and len(basedirs) > 0:
+        try:
+            bd = basedirs.pop(0)
+            os.makedirs(bd)
+            basedir_ok = True
+        except OSError:
+            print(f'Directory {bd} exists...')
+    
+    if basedir_ok == False:
+        print('Please check your local directory')
+        exit(-1)
+    else:
+        print(f'Download data into {bd}...')
 
     for lcnt, line in enumerate(infile):
         if lcnt > 0:
