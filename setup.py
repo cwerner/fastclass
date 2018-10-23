@@ -15,7 +15,6 @@ requirements = to_list("""
     icrawler
     Pillow
     tqdm
-    tkinter
 """)
 
 setup(
