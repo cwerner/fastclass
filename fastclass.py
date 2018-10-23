@@ -57,6 +57,10 @@ class AppTk(tk.Frame):
         self.copy = COPY        
         self.wipe = WIPE
 
+        if len(self.filelist) == 0:
+            print('No files in infolder.')
+            exit(-1)
+
         self.index=-1
         
         self.size = (299, 299)
@@ -246,7 +250,7 @@ def main(INFOLDER, OUTFILE, COPY, EXT, DEL, WIPE):
     # start event loop
     root.mainloop()
 
-# CLi - command line arguments
+# Cli - command line arguments
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
 click.Context.get_usage = click.Context.get_help
 
