@@ -1,3 +1,9 @@
+#!/usr/bin/env/ python 
+#
+# fc_clean.py
+# 
+# Christian Werner, 2018-10-23
+
 import click
 import glob
 import os
