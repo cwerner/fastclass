@@ -18,7 +18,7 @@ from PIL import Image
 import sys
 from tqdm import tqdm
 
-EPILOG = """::: FastClass Downloader :::\r
+EPILOG = """::: FastClass fc_download :::\r
 \r
 ...an easy way to crawl the net for images when building a\r
 dataset for conv nets.\r

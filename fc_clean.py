@@ -11,7 +11,7 @@ from PIL import ImageTk, Image
 import tkinter as tk
 import shutil
 
-EPILOG = """::: FastClass :::\r
+EPILOG = """::: FastClass fc_clean :::\r
 ...a fast way to cleanup/ sort your images when building a\r
 dataset for conv nets.\r
 \r
@@ -279,7 +279,7 @@ click.Context.get_usage = click.Context.get_help
 @click.argument('outfile', type=click.File('w'), required=False)
 
 def cli(infolder, outfile, copy, ext, delete, wipe):
-    """FastClass Image Classifier"""
+    """FastClass fc_clean"""
 
     main(infolder, outfile, copy, ext, delete, wipe)
 

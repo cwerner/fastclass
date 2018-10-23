@@ -1,3 +1,5 @@
 click
+icrawler
 Pillow
+tqdm
 tkinter
