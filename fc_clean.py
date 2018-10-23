@@ -18,6 +18,7 @@ dataset for deep learning.\r
 Note:\r
 In the application use the following keys:\r
 <1>, <2>, ... <9> for class assignments or quality ratings\r
+<space> assigns <1>\r
 <d> to mark a deletion\r
 <x> to terminate the app/ write output\r
 \r
@@ -51,9 +52,8 @@ class AppTk(tk.Frame):
         self.root = args[0]
 
         # store classification
-        self.c1 = set()
-        self.c2 = set()
-        self.delete  = set()
+        self._class = {f'c{c}': set() for c in range(1,10)}
+        self._delete = set()
 
         # config settings
         self.filelist = sorted(glob.glob(INFOLDER + '/*.' + EXT))
@@ -62,6 +62,8 @@ class AppTk(tk.Frame):
         self.exclude_del = DEL 
         self.copy = COPY        
         self.wipe = WIPE
+
+        self._classified = 0
 
         if len(self.filelist) == 0:
             print('No files in infolder.')
@@ -77,115 +79,163 @@ class AppTk(tk.Frame):
         # raise window to top
         self.root.lift()
         self.root.attributes("-topmost", True)
-    
+        
         # show first image
         self.display_next()
+    
+    @property
+    def total(self):
+        return len(self.filelist)
         
+    @property
+    def classified(self):
+        cnt = 0
+        for c in '123456789':
+            if self.filelist[self.index] in self._class[f'c{c}']:
+                cnt += len(self._class[f'c{c}'])            
+        if self.filelist[self.index] in self._delete: 
+            cnt += len(self._delete)
+        return cnt 
+
+    @property
+    def title(self):
+
+        def get_class():
+            for c in '123456789':
+                if self.filelist[self.index] in self._class[f'c{c}']:
+                    return f'[ {c} ] '
+            if self.filelist[self.index] in self._delete: 
+                return '[ X ] '
+            return '[   ] '
+
+        return (os.path.basename( self.filelist[self.index]) + 
+                " - " +
+                get_class() + 
+                f" ({self.classified}/{self.total})")
+
+    def print_titlebar(self):
+        self.root.title(self.title)
+
     def callback(self, event=None):
-        #_key = '{k!r}'.format(k = event.char)
-        if event.char == "1":
-            print("Class 1")
-            #self.ButtonA.config(bg='yellow')
-            #self.root.after(100, lambda: self.ButtonA.config(bg='lightgrey'))
-            self.c1.add(self.filelist[self.index])
-            self.display_next()
-        elif event.char == "2":
-            print("Class 2")
-            #self.ButtonB.config(bg='yellow')
-            #self.root.after(100, lambda: self.ButtonB.config(bg='lightgrey'))
-            self.c2.add(self.filelist[self.index])
-            self.display_next()
-        elif event.char == "d":
-            print("DELETE!")
-            self.delete.add(self.filelist[self.index])
+
+        def button_action(char):
+            self._class[f'c{char}'].add(self.filelist[self.index]) 
             self.display_next()
 
+        if event.char in '123456789':
+            button_action(event.char)
+        elif event.keysym == 'space': #'<space>':
+            button_action('1')
+        elif event.char == 'd':
+            self._delete.add(self.filelist[self.index])
+            self.display_next()
         elif event.keysym == 'Left': #'<Left>':
             self.display_prev()
-
         elif event.keysym == 'Right': #'<Right>':
             self.display_next()
-
-
         elif event.char == "x":
             print("Results:")
-            
-            print("\nCLASS 1:")
-            for i in sorted(list(self.c1)):
-                print(i)
-
-            print("\nCLASS 2:")
-            for i in sorted(list(self.c2)):
-                print(i)
-
+            for c in range(1,10):
+                print("\nCLASS {c}:")
+                for i in sorted(list(self._class[f'c{c}'])): print(i)
             print("\nDELETE:")
-            for i in sorted(list(self.delete)):
+            for i in sorted(list(self._delete)): 
                 print(i)
-
-            # create output folders
-            if self.copy:
-                ds = ['class1_files', 'class2_files']
-
-                if os.path.exists(ds[0]):
-                    if self.wipe:
-                        if os.path.exists(ds[0]):
-                            print("Wiping existing output folder!")
-                            for d in ds:
-                                shutil.rmtree('/%s' % d)
-                    else:
-                        print("Output folders exist and wipe was not requested.")
-                        print("Will not copy folders...")
-                        self.copy = False
-
-                for d in ds:
-                    if not os.path.exists(d):
-                        os.makedirs(d)
-
-
-            if not self.outfile:
-                self.outfile = open(os.path.basename(self.infolder) + '_classified.csv', 'w')
-            for f in self.filelist:
-                if f in self.c1:
-                    x = '1'
-                    if self.copy:
-                        shutil.copy(f, ds[0])
-                elif f in self.c2:
-                    x = '2'
-                    if self.copy:
-                        shutil.copy(f, ds[1])                    
-                elif f in self.delete:
-                    if self.exclude_del:
-                        continue
-                    x = '-1'
-                else:
-                    # no decision ignore for output
-                    x = '0'                    
-                    continue
-                out = f + ';' + x + '\n'
-                self.outfile.write(out)
-
-            self.outfile.close()
-
             self.root.destroy()  
         else:
             pass
 
 
-    def printSomething(self):
-        labeled = " - "
-        if self.filelist[self.index] in self.c1:
-            labeled += "[ 1 ] " 
-        if self.filelist[self.index] in self.c2:
-            labeled += "[ 2 ] "
-        if self.filelist[self.index] in self.delete:
-            labeled += "[ X ] "
+        # #_key = '{k!r}'.format(k = event.char)
+        # if event.char == "1":
+        #     print("Class 1")
+        #     #self.ButtonA.config(bg='yellow')
+        #     #self.root.after(100, lambda: self.ButtonA.config(bg='lightgrey'))
+        #     self.c1.add(self.filelist[self.index])
+        #     self.display_next()
+        # elif event.char == "2":
+        #     print("Class 2")
+        #     #self.ButtonB.config(bg='yellow')
+        #     #self.root.after(100, lambda: self.ButtonB.config(bg='lightgrey'))
+        #     self.c2.add(self.filelist[self.index])
+        #     self.display_next()
+        # elif event.char == "d":
+        #     print("DELETE!")
+        #     self.delete.add(self.filelist[self.index])
+        #     self.display_next()
 
-        total = len(self.filelist) 
-        classified = len(self.c1) + len(self.c2) + len(self.delete)
+        # elif event.keysym == 'Left': #'<Left>':
+        #     self.display_prev()
 
-        labeled += " (%d/%d)" % (classified, total)
+        # elif event.keysym == 'Right': #'<Right>':
+        #     self.display_next()
 
-        self.root.title(os.path.basename( self.filelist[self.index]) + labeled )
+
+        # elif event.char == "x":
+        #     print("Results:")
+            
+        #     print("\nCLASS 1:")
+        #     for i in sorted(list(self.c1)):
+        #         print(i)
+
+        #     print("\nCLASS 2:")
+        #     for i in sorted(list(self.c2)):
+        #         print(i)
+
+        #     print("\nDELETE:")
+        #     for i in sorted(list(self.delete)):
+        #         print(i)
+
+        #     # create output folders
+        #     if self.copy:
+        #         ds = ['class1_files', 'class2_files']
+
+        #         if os.path.exists(ds[0]):
+        #             if self.wipe:
+        #                 if os.path.exists(ds[0]):
+        #                     print("Wiping existing output folder!")
+        #                     for d in ds:
+        #                         shutil.rmtree('/%s' % d)
+        #             else:
+        #                 print("Output folders exist and wipe was not requested.")
+        #                 print("Will not copy folders...")
+        #                 self.copy = False
+
+        #         for d in ds:
+        #             if not os.path.exists(d):
+        #                 os.makedirs(d)
+
+
+        #     if not self.outfile:
+        #         self.outfile = open(os.path.basename(self.infolder) + '_classified.csv', 'w')
+        #     for f in self.filelist:
+        #         if f in self.c1:
+        #             x = '1'
+        #             if self.copy:
+        #                 shutil.copy(f, ds[0])
+        #         elif f in self.c2:
+        #             x = '2'
+        #             if self.copy:
+        #                 shutil.copy(f, ds[1])                    
+        #         elif f in self.delete:
+        #             if self.exclude_del:
+        #                 continue
+        #             x = '-1'
+        #         else:
+        #             # no decision ignore for output
+        #             x = '0'                    
+        #             continue
+        #         out = f + ';' + x + '\n'
+        #         self.outfile.write(out)
+
+        #     self.outfile.close()
+
+        #     self.root.destroy()  
+        # else:
+        #     pass
+
+
+
 
     def setup(self):
         self.Label=tk.Label(self)
@@ -198,6 +248,7 @@ class AppTk(tk.Frame):
         
 
     def display_next(self):
+        self.print_titlebar()
         self.index+=1
         try:
             f=self.filelist[self.index]
@@ -215,10 +266,11 @@ class AppTk(tk.Frame):
         photoimage = ImageTk.PhotoImage(bg)
         self.Label.config(image=photoimage)
         self.Label.image=photoimage
-        self.printSomething()
+        self.print_titlebar()
 
 
     def display_prev(self):
+
         self.index-=1
         try:
             f=self.filelist[self.index]
@@ -236,7 +288,7 @@ class AppTk(tk.Frame):
         photoimage = ImageTk.PhotoImage(bg)
         self.Label.config(image=photoimage)
         self.Label.image=photoimage
-        self.printSomething()
+        self.print_titlebar()
 
 
 def main(INFOLDER, OUTFILE, COPY, EXT, DEL, WIPE):
@@ -251,6 +303,14 @@ def main(INFOLDER, OUTFILE, COPY, EXT, DEL, WIPE):
     root.lift()
     root.attributes('-topmost',True)
     root.after_idle(root.attributes,'-topmost',False)
+
+    from os import system
+    from platform import system as platform
+
+    if platform() == 'Darwin':  # How Mac OS X is identified by Python
+        script = 'tell application "System Events" \
+        to set frontmost of the first process whose unix id is {pid} to true'.format(pid=os.getpid())
+        os.system("/usr/bin/osascript -e '{script}'".format(script=script))
 
     root.mainloop()
 
