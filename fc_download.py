@@ -9,9 +9,11 @@
 #  - check if we need grace periods to avoid blocking
  
 import click
+import collections
 import glob
 import hashlib
 from icrawler.builtin import GoogleImageCrawler, BingImageCrawler, BaiduImageCrawler
+import itertools
 import logging
 import os
 from PIL import Image
@@ -26,6 +28,15 @@ dataset for deep learning.\r
 Example: fcd -c GOOGLE -c BING -s 224 example/guitars.csv
 
 """
+
+def flatten(iterable, ltypes=collections.Iterable):
+    remainder = iter(iterable)
+    while True:
+        first = next(remainder)
+        if isinstance(first, ltypes) and not isinstance(first, (str,bytes)):
+            remainder = itertools.chain(first, remainder)
+        else:
+            yield first
 
 def crawl(DIR, KW, crawlers=['GOOGLE', 'BING', 'BAIDU']):
     print('(1) Crawling ...')
@@ -69,34 +80,25 @@ def hashfile(path, blocksize = 65536):
     afile.close()
     return hasher.hexdigest()
 
-def findDup(parentFolder, match=None):
+def remove_dups(parentFolder, match=None):
     # Dups in format {hash:[names]}
+    
     dups = {}
     for dirName, subdirs, fileList in os.walk(parentFolder):
         print('Scanning %s...' % dirName)
         for filename in fileList:
-            # Get the path to the file
             path = os.path.join(dirName, filename)
-            # Calculate hash
             file_hash = hashfile(path)
-            # Add or append the file path
             if file_hash in dups:
                 dups[file_hash].append(path)
             else:
                 dups[file_hash] = [path]
-    return dups
+    dups = flatten([v[1:] for k,v in dups.items() if len(v) > 1])
 
-def remove_dups(folder):
-    print('Removing duplicates')
+    print(f"Number of duplicate image files: {len(list(dups))}. Removing...")
 
-    dups = findDup(folder)
-    print(f"Number of duplicate image files: {len(dups)}. Removing...")
-    dup_files = [dups[hash] for hash in dups if len(dups[hash]) > 1]
-    for d in dup_files:
-        # keep first, delete all others
-        for rfile in d[1:]:
-            os.remove(rfile)
-
+    for dup in dups:
+        os.remove(dup)
 
 def resize(files, outpath=None, size=(299, 299)):
     print(f'(2) Resizing images to {size}')
@@ -113,10 +115,7 @@ def resize(files, outpath=None, size=(299, 299)):
             bg = bg.convert('RGB')
 
             fname, _ = os.path.splitext(os.path.basename(f))
-            out = fname + '.jpg'
-            ##if outpath:
-            #    out = os.path.join(outpath, str(fcnt+1).zfill(6) + '.jpg')
-            out = os.path.join(outpath, out) 
+            out = os.path.join(outpath, fname + '.jpg') 
             bg.save(out)
             t.update(1)
             
@@ -176,20 +175,17 @@ def main(infile, size, crawler, keep, outpath):
 
         crawl(DIR, search_term, crawlers=crawler)
 
+        remove_dups(DIR)
+
         # resize
         out_resized = os.path.join(outpath, out_name)
         os.makedirs(out_resized, exist_ok=True)
 
         files = glob.glob(DIR+'/*')
-        print('>>>', len(files))
         resize(files, outpath=out_resized, size=SIZE)
-    
-    # remove duplicates
-    remove_dups(outpath)
 
     if keep:
         os.rename(bd, outpath+'.raw')
-
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
