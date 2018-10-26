@@ -31,7 +31,7 @@ def crawl(DIR, KW, crawlers=['GOOGLE', 'BING', 'BAIDU']):
     print('(1) Crawling ...')
     # prepare folders
     for c in crawlers:
-        os.makedirs(DIR+'.'+c.lower(), exist_ok=True)
+        os.makedirs(DIR, exist_ok=True)
 
         if c == 'GOOGLE':
             print('    -> Google')
@@ -40,23 +40,24 @@ def crawl(DIR, KW, crawlers=['GOOGLE', 'BING', 'BAIDU']):
                 feeder_threads=1,
                 parser_threads=1,
                 downloader_threads=4,
-                storage={'root_dir': DIR+'.google'})
+                storage={'root_dir': DIR})
 
-            google_crawler.crawl(keyword=KW, offset=0, max_num=1000,
-                                min_size=(200,200), max_size=None, file_idx_offset=0)
+            google_crawler.crawl(keyword=KW, offset=0, max_num=100,
+                                min_size=(200,200), max_size=None, file_idx_offset='auto')
+            google_crawler
         if c == 'BING':
             print('    -> Bing')
             bing_crawler = BingImageCrawler(log_level=logging.CRITICAL,
                                             downloader_threads=4,
-                                            storage={'root_dir': DIR+'.bing'})
-            bing_crawler.crawl(keyword=KW, filters=None, offset=0, max_num=1000)
+                                            storage={'root_dir': DIR})
+            bing_crawler.crawl(keyword=KW, filters=None, offset=0, max_num=100, file_idx_offset='auto')
 
         if c == 'BAIDU':
             print('    -> Baidu')
             baidu_crawler = BaiduImageCrawler(log_level=logging.CRITICAL,
-                                    storage={'root_dir': DIR+'.baidu'})
-            baidu_crawler.crawl(keyword=KW, offset=0, max_num=1000,
-                                min_size=(200,200), max_size=None)
+                                    storage={'root_dir': DIR})
+            baidu_crawler.crawl(keyword=KW, offset=0, max_num=100,
+                                min_size=(200,200), max_size=None, file_idx_offset='auto')
 
 def hashfile(path, blocksize = 65536):
     afile = open(path, 'rb')
@@ -113,13 +114,14 @@ def resize(files, outpath=None, size=(299, 299)):
 
             fname, _ = os.path.splitext(os.path.basename(f))
             out = fname + '.jpg'
-            if outpath:
-                out = os.path.join(outpath, str(fcnt+1).zfill(6) + '.jpg')
+            ##if outpath:
+            #    out = os.path.join(outpath, str(fcnt+1).zfill(6) + '.jpg')
+            out = os.path.join(outpath, out) 
             bg.save(out)
             t.update(1)
             
 
-def main(infile, size, crawler, outpath):
+def main(infile, size, crawler, keep, outpath):
     SIZE=(size,size)
 
     classes = []
@@ -165,7 +167,7 @@ def main(infile, size, crawler, outpath):
             remove_items = [remove_terms]
 
         for i in remove_items:
-            out_name = out_name.replace(i, '')
+            out_name = out_name.replace(i.strip(), '')
 
         # the cleaned name of this classes folder
         out_name = out_name.strip().replace('"','').replace('&', 'and').replace(' ', '_')
@@ -178,11 +180,15 @@ def main(infile, size, crawler, outpath):
         out_resized = os.path.join(outpath, out_name)
         os.makedirs(out_resized, exist_ok=True)
 
-        files = glob.glob(DIR+'.*/*')
+        files = glob.glob(DIR+'/*')
+        print('>>>', len(files))
         resize(files, outpath=out_resized, size=SIZE)
     
     # remove duplicates
     remove_dups(outpath)
+
+    if keep:
+        os.rename(bd, outpath+'.raw')
 
 
 
@@ -196,6 +202,9 @@ click.Context.get_usage = click.Context.get_help
                     show_default=True, multiple=True,
                     help='selection of crawler (multiple invocations supported)')
 
+@click.option('-k', '--keep',  default=False, is_flag=True, show_default=True,
+                    help='keep original results of crawlers')
+
 @click.option('-s', '--size',  default=299, show_default=True, type=int,
                     help='image size for rescaling')
 
@@ -204,8 +213,8 @@ click.Context.get_usage = click.Context.get_help
 
 @click.argument('infile', type=click.File('r'), required=True)
 
-def cli(infile, size, crawler, outpath):
-    main(infile, size, crawler, outpath)
+def cli(infile, size, crawler, keep, outpath):
+    main(infile, size, crawler, keep, outpath)
 
 if __name__ == "__main__":
     cli()
