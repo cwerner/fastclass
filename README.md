@@ -4,7 +4,7 @@ classify them into groups for building deep learning image datasets.
 
 ## Installation
 
-*pip install git+https://github.com/cwerner/fastclass.git*
+```pip install git+https://github.com/cwerner/fastclass.git#egg=fastclass``` 
 
 The installer will also place the executables *fcc* (fc_clean.py) and *fcd* (fc_download.py)
 in your PATH.  
