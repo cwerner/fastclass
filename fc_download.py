@@ -19,6 +19,7 @@ import os
 from PIL import Image
 import sys
 from tqdm import tqdm
+from typing import List, Optional
 
 EPILOG = """::: FastClass fc_download :::\r
 \r
@@ -38,7 +39,9 @@ def flatten(iterable, ltypes=collections.Iterable):
         else:
             yield first
 
-def crawl(DIR, KW, crawlers=['GOOGLE', 'BING', 'BAIDU']):
+def crawl(DIR: str, 
+          KW: str, 
+          crawlers: Optional[List[str]] = ['GOOGLE', 'BING', 'BAIDU']) -> None:
     print('(1) Crawling ...')
     # prepare folders
     for c in crawlers:
@@ -70,7 +73,7 @@ def crawl(DIR, KW, crawlers=['GOOGLE', 'BING', 'BAIDU']):
             baidu_crawler.crawl(keyword=KW, offset=0, max_num=100,
                                 min_size=(200,200), max_size=None, file_idx_offset='auto')
 
-def hashfile(path, blocksize = 65536):
+def hashfile(path: str, blocksize: int = 65536):
     afile = open(path, 'rb')
     hasher = hashlib.md5()
     buf = afile.read(blocksize)
@@ -100,7 +103,7 @@ def remove_dups(parentFolder, match=None):
     for dup in dups:
         os.remove(dup)
 
-def resize(files, outpath=None, size=(299, 299)):
+def resize(files: List[str], outpath=None, size=(299, 299)):
     print(f'(2) Resizing images to {size}')
     with tqdm(total=len(files)) as t:
         for fcnt, f in enumerate(files):
