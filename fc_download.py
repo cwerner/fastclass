@@ -30,7 +30,7 @@ Example: fcd -c GOOGLE -c BING -s 224 example/guitars.csv
 
 """
 
-def flatten(iterable: Iterable, ltypes=collections.Iterable) -> Any:
+def flatten(iterable: Iterable, ltypes=collections.abc.Iterable) -> Any:
     remainder = iter(iterable)
     while True:
         first = next(remainder)
