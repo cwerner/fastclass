@@ -19,7 +19,7 @@ import os
 from PIL import Image
 import sys
 from tqdm import tqdm
-from typing import List, Optional
+from typing import Any, Iterable, List, Optional, Tuple
 
 EPILOG = """::: FastClass fc_download :::\r
 \r
@@ -30,7 +30,7 @@ Example: fcd -c GOOGLE -c BING -s 224 example/guitars.csv
 
 """
 
-def flatten(iterable, ltypes=collections.Iterable):
+def flatten(iterable: Iterable, ltypes=collections.Iterable) -> Any:
     remainder = iter(iterable)
     while True:
         first = next(remainder)
@@ -39,13 +39,11 @@ def flatten(iterable, ltypes=collections.Iterable):
         else:
             yield first
 
-def crawl(DIR: str, 
-          KW: str, 
-          crawlers: Optional[List[str]] = ['GOOGLE', 'BING', 'BAIDU']) -> None:
+def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU']):
     print('(1) Crawling ...')
     # prepare folders
     for c in crawlers:
-        os.makedirs(DIR, exist_ok=True)
+        os.makedirs(folder, exist_ok=True)
 
         if c == 'GOOGLE':
             print('    -> Google')
@@ -54,26 +52,26 @@ def crawl(DIR: str,
                 feeder_threads=1,
                 parser_threads=1,
                 downloader_threads=4,
-                storage={'root_dir': DIR})
+                storage={'root_dir': folder})
 
-            google_crawler.crawl(keyword=KW, offset=0, max_num=100,
-                                min_size=(200,200), max_size=None, file_idx_offset='auto')
-            google_crawler
+            google_crawler.crawl(keyword=search, offset=0, max_num=1000,
+                                min_size=(200,200), max_size=None, file_idx_offset=0)
+
         if c == 'BING':
             print('    -> Bing')
             bing_crawler = BingImageCrawler(log_level=logging.CRITICAL,
                                             downloader_threads=4,
-                                            storage={'root_dir': DIR})
-            bing_crawler.crawl(keyword=KW, filters=None, offset=0, max_num=100, file_idx_offset='auto')
+                                            storage={'root_dir': folder})
+            bing_crawler.crawl(keyword=search, filters=None, offset=0, max_num=1000, file_idx_offset='auto')
 
         if c == 'BAIDU':
             print('    -> Baidu')
             baidu_crawler = BaiduImageCrawler(log_level=logging.CRITICAL,
-                                    storage={'root_dir': DIR})
-            baidu_crawler.crawl(keyword=KW, offset=0, max_num=100,
+                                    storage={'root_dir': folder})
+            baidu_crawler.crawl(keyword=search, offset=0, max_num=1000,
                                 min_size=(200,200), max_size=None, file_idx_offset='auto')
 
-def hashfile(path: str, blocksize: int = 65536):
+def hashfile(path: str, blocksize: int = 65536) -> str:
     afile = open(path, 'rb')
     hasher = hashlib.md5()
     buf = afile.read(blocksize)
@@ -83,11 +81,11 @@ def hashfile(path: str, blocksize: int = 65536):
     afile.close()
     return hasher.hexdigest()
 
-def remove_dups(parentFolder, match=None):
+def remove_dups(parent_folder: str, match: str = None):
     # Dups in format {hash:[names]}
     
     dups = {}
-    for dirName, subdirs, fileList in os.walk(parentFolder):
+    for dirName, subdirs, fileList in os.walk(parent_folder):
         print('Scanning %s...' % dirName)
         for filename in fileList:
             path = os.path.join(dirName, filename)
@@ -103,7 +101,7 @@ def remove_dups(parentFolder, match=None):
     for dup in dups:
         os.remove(dup)
 
-def resize(files: List[str], outpath=None, size=(299, 299)):
+def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int] = (299, 299)):
     print(f'(2) Resizing images to {size}')
     with tqdm(total=len(files)) as t:
         for fcnt, f in enumerate(files):
@@ -123,7 +121,7 @@ def resize(files: List[str], outpath=None, size=(299, 299)):
             t.update(1)
             
 
-def main(infile, size, crawler, keep, outpath):
+def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
     SIZE=(size,size)
 
     classes = []
