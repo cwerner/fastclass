@@ -114,7 +114,7 @@ def resize(files, outpath=None, size=(299, 299)):
             fname, _ = os.path.splitext(os.path.basename(f))
             out = fname + '.jpg'
             if outpath:
-                out = os.path.join(outpath, fname + '.jpg')
+                out = os.path.join(outpath, str(fcnt+1).zfill(6) + '.jpg')
             bg.save(out)
             t.update(1)
             
