@@ -72,36 +72,33 @@ def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', '
                                 min_size=(200,200), max_size=None, file_idx_offset='auto')
 
 def hashfile(path: str, blocksize: int = 65536) -> str:
-    afile = open(path, 'rb')
-    hasher = hashlib.md5()
-    buf = afile.read(blocksize)
-    while len(buf) > 0:
-        hasher.update(buf)
-        buf = afile.read(blocksize)
-    afile.close()
+    """Create hash for file"""
+
+    with open(path, 'rb') as f:
+        hasher = hashlib.md5()
+        buf = f.read(blocksize)
+        while len(buf) > 0:
+            hasher.update(buf)
+            buf = f.read(blocksize)
     return hasher.hexdigest()
 
 def remove_dups(parent_folder: str, match: str = None):
-    # Dups in format {hash:[names]}
+    """Remove duplicate files"""
     
     dups = {}
-    for dirName, subdirs, fileList in os.walk(parent_folder):
-        print('Scanning %s...' % dirName)
-        for filename in fileList:
-            path = os.path.join(dirName, filename)
-            file_hash = hashfile(path)
-            if file_hash in dups:
-                dups[file_hash].append(path)
-            else:
-                dups[file_hash] = [path]
+    for dirName, subdirs, files in os.walk(parent_folder):
+        for f in files:
+            path = os.path.join(dirName, f)
+            dups.setdefault(hashfile(path), []).append(path)
     dups = flatten([v[1:] for k,v in dups.items() if len(v) > 1])
 
     print(f"Number of duplicate image files: {len(list(dups))}. Removing...")
-
     for dup in dups:
         os.remove(dup)
 
 def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int] = (299, 299)):
+    """Resize image to specified size"""
+
     print(f'(2) Resizing images to {size}')
     with tqdm(total=len(files)) as t:
         for fcnt, f in enumerate(files):
@@ -122,8 +119,8 @@ def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int
             
 
 def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
-    SIZE=(size,size)
 
+    SIZE=(size,size)
     classes = []
 
     if 'ALL' in crawler:
@@ -137,7 +134,6 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
         print(f'INFO: final dataset will be located in {outpath}')
 
     with tempfile.TemporaryDirectory() as tmp:
-
         for lcnt, line in enumerate(infile):
             if lcnt > 0:
                 search_term, remove_terms = line[:-1].split(';')
@@ -147,22 +143,18 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
             print(f'Searching: >> {search_term} <<')
             out_name = search_term
 
-            if ',' in remove_terms:
-                remove_items = remove_terms.split(',')
-            else:
-                remove_items = [remove_terms]
+            # preprocessing
+            remove_items = remove_terms.split(',') if ',' in remove_terms else [remove_terms]
 
             for i in remove_items:
                 out_name = out_name.replace(i.strip(), '')
 
-            # the cleaned name of this classes folder
             out_name = (out_name.strip()
                                 .replace('"','')
                                 .replace('&', 'and')
                                 .replace(' ', '_'))
 
             raw_folder = os.path.join(tmp, out_name)
-
 
             crawl(raw_folder, search_term, crawlers=crawler)
 
