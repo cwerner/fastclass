@@ -10,7 +10,7 @@ import piexif
 import piexif.helper
 
 from tqdm import tqdm
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 def resize(files: List[str], \
            outpath: Optional[str] = None, \
@@ -52,3 +52,12 @@ def resize(files: List[str], \
             t.update(1)
     
     return sources
+
+def image_pad(file_name: str, size: Tuple[int, int]) -> Any:
+    """Read image and pad"""
+    im = Image.open(file_name)
+    im.thumbnail(size, Image.ANTIALIAS)
+
+    bg = Image.new('RGBA', size, (255, 255, 255, 0))
+    bg.paste(im, (int((size[0] - im.size[0]) / 2), int((size[1] - im.size[1]) / 2)))
+    return bg

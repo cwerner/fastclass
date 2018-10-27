@@ -12,6 +12,8 @@ from PIL import ImageTk, Image
 import tkinter as tk
 import shutil
 
+from . imageprocessing import image_pad
+
 EPILOG = """::: FastClass fcc :::\r
 ...a fast way to cleanup/ sort your images when building a\r
 dataset for deep learning.\r
@@ -188,13 +190,9 @@ class AppTk(tk.Frame):
             self.display_next()
             return
 
-        im = Image.open(f)
-        im.thumbnail(self.size, Image.ANTIALIAS)
+        padded_im = image_pad(f, self.size)
 
-        bg = Image.new('RGBA', self.size, (255, 255, 255, 0))
-        bg.paste(im, (int((self.size[0] - im.size[0]) / 2), int((self.size[1] - im.size[1]) / 2)))
-
-        photoimage = ImageTk.PhotoImage(bg)
+        photoimage = ImageTk.PhotoImage(padded_im)
         self.Label.config(image=photoimage)
         self.Label.image=photoimage
         self.print_titlebar()
@@ -209,13 +207,9 @@ class AppTk(tk.Frame):
             self.display_next()
             return
 
-        im = Image.open(f)
-        im.thumbnail(self.size, Image.ANTIALIAS)
+        padded_im = image_pad(f, self.size)
 
-        bg = Image.new('RGBA', self.size, (255, 255, 255, 0))
-        bg.paste(im, (int((self.size[0] - im.size[0]) / 2), int((self.size[1] - im.size[1]) / 2)))
-
-        photoimage = ImageTk.PhotoImage(bg)
+        photoimage = ImageTk.PhotoImage(padded_im)
         self.Label.config(image=photoimage)
         self.Label.image=photoimage
         self.print_titlebar()
