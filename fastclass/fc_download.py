@@ -46,7 +46,7 @@ def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', '
     os.makedirs(folder, exist_ok=True)
 
     sources = {}
-    max_num = 10
+    max_num = 1000
 
     for c in crawlers:
         print(f'    -> {c}')
