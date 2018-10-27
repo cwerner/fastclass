@@ -6,12 +6,23 @@
 
 import os
 from PIL import Image
-from tqdm import tqdm
-from typing import List, Optional, Tuple
+import piexif
+import piexif.helper
 
-def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int] = (299, 299)):
+from tqdm import tqdm
+from typing import Dict, List, Optional, Tuple
+
+def resize(files: List[str], \
+           outpath: Optional[str] = None, \
+           size: Tuple[int, int] = (299, 299), \
+           urls: Optional[Dict[str, str]] = None) -> Optional[Dict[str, str]]:
     """Resize image to specified size"""
     print(f'(2) Resizing images to {size}')
+
+    sources = None
+    if urls:
+        sources = {}
+
     with tqdm(total=len(files)) as t:
         for fcnt, f in enumerate(files):
             im = Image.open(f)
@@ -27,4 +38,17 @@ def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int
             fname, _ = os.path.splitext(os.path.basename(f))
             out = os.path.join(outpath, fname + '.jpg') 
             bg.save(out)
+
+            if urls:
+                # embed source in image
+                tag_data = piexif.helper.UserComment.dump('source: '+urls[os.path.basename(f)])
+                exif_dict = piexif.load(out)
+                exif_dict["Exif"][piexif.ExifIFD.UserComment] = tag_data
+                exif_bytes = piexif.dump(exif_dict)
+                bg.save(out, exif=exif_bytes)
+
+                sources[os.path.basename(out)] = urls[os.path.basename(f)]
+
             t.update(1)
+    
+    return sources

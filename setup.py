@@ -14,13 +14,13 @@ requirements = to_list("""
     click
     icrawler
     Pillow
+    piexif
     tqdm
 """)
 
 setup(
     name = 'fastclass',
-    version = 0.1.1,
-
+    version = '0.1.1',
     packages = find_packages(),
     install_requires = requirements,
     python_requires  = '>=3.6',
