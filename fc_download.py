@@ -17,7 +17,9 @@ import itertools
 import logging
 import os
 from PIL import Image
+import shutil
 import sys
+import tempfile
 from tqdm import tqdm
 from typing import Any, Iterable, List, Optional, Tuple
 
@@ -42,11 +44,11 @@ def flatten(iterable: Iterable, ltypes=collections.abc.Iterable) -> Any:
 def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU']):
     print('(1) Crawling ...')
     # prepare folders
-    for c in crawlers:
-        os.makedirs(folder, exist_ok=True)
+    os.makedirs(folder, exist_ok=True)
 
+    for c in crawlers:
+        print(f'    -> {c}')
         if c == 'GOOGLE':
-            print('    -> Google')
             google_crawler = GoogleImageCrawler(
                 log_level=logging.CRITICAL,
                 feeder_threads=1,
@@ -58,14 +60,12 @@ def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', '
                                 min_size=(200,200), max_size=None, file_idx_offset=0)
 
         if c == 'BING':
-            print('    -> Bing')
             bing_crawler = BingImageCrawler(log_level=logging.CRITICAL,
                                             downloader_threads=4,
                                             storage={'root_dir': folder})
             bing_crawler.crawl(keyword=search, filters=None, offset=0, max_num=1000, file_idx_offset='auto')
 
         if c == 'BAIDU':
-            print('    -> Baidu')
             baidu_crawler = BaiduImageCrawler(log_level=logging.CRITICAL,
                                     storage={'root_dir': folder})
             baidu_crawler.crawl(keyword=search, offset=0, max_num=1000,
@@ -136,57 +136,47 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
         os.makedirs(outpath)
         print(f'INFO: final dataset will be located in {outpath}')
 
-    BASEDIR='tmp'; basedir_ok = False
-    basedirs = [BASEDIR] + [f'{BASEDIR}.{i}' for i in range(10)]
-    while basedir_ok == False and len(basedirs) > 0:
-        try:
-            bd = basedirs.pop(0)
-            os.makedirs(bd)
-            basedir_ok = True
-        except OSError:
-            print(f'Directory "{bd}" exists...')
-    
-    if basedir_ok == False:
-        print('Please check your local directory')
-        exit(-1)
-    else:
-        print(f'Download data into "{bd}"...')
+    with tempfile.TemporaryDirectory() as tmp:
 
-    for lcnt, line in enumerate(infile):
-        if lcnt > 0:
-            search_term, remove_terms = line[:-1].split(';')
-            classes.append((search_term, remove_terms))
+        for lcnt, line in enumerate(infile):
+            if lcnt > 0:
+                search_term, remove_terms = line[:-1].split(';')
+                classes.append((search_term, remove_terms))
 
-    for search_term, remove_terms in classes:
-        print(f'Searching: >> {search_term} <<')
-        out_name = search_term
+        for search_term, remove_terms in classes:
+            print(f'Searching: >> {search_term} <<')
+            out_name = search_term
 
-        if ',' in remove_terms:
-            remove_items = remove_terms.split(',')
-        else:
-            remove_items = [remove_terms]
+            if ',' in remove_terms:
+                remove_items = remove_terms.split(',')
+            else:
+                remove_items = [remove_terms]
 
-        for i in remove_items:
-            out_name = out_name.replace(i.strip(), '')
+            for i in remove_items:
+                out_name = out_name.replace(i.strip(), '')
 
-        # the cleaned name of this classes folder
-        out_name = out_name.strip().replace('"','').replace('&', 'and').replace(' ', '_')
+            # the cleaned name of this classes folder
+            out_name = (out_name.strip()
+                                .replace('"','')
+                                .replace('&', 'and')
+                                .replace(' ', '_'))
 
-        DIR= os.path.join(BASEDIR, out_name)
+            raw_folder = os.path.join(tmp, out_name)
 
-        crawl(DIR, search_term, crawlers=crawler)
 
-        remove_dups(DIR)
+            crawl(raw_folder, search_term, crawlers=crawler)
 
-        # resize
-        out_resized = os.path.join(outpath, out_name)
-        os.makedirs(out_resized, exist_ok=True)
+            remove_dups(raw_folder)
 
-        files = glob.glob(DIR+'/*')
-        resize(files, outpath=out_resized, size=SIZE)
+            # resize
+            out_resized = os.path.join(outpath, out_name)
+            os.makedirs(out_resized, exist_ok=True)
 
-    if keep:
-        os.rename(bd, outpath+'.raw')
+            files = glob.glob(raw_folder+'/*')
+            resize(files, outpath=out_resized, size=SIZE)
+
+        if keep:
+            shutil.copytree(tmp, outpath+'.raw')
 
 
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
