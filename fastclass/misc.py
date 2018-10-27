@@ -14,7 +14,10 @@ def flatten(iterable: Iterable, ltypes=collections.abc.Iterable) -> Any:
     """Convert nested into a flat list"""
     remainder = iter(iterable)
     while True:
-        first = next(remainder)
+        try:
+            first = next(remainder)
+        except StopIteration:
+            return
         if isinstance(first, ltypes) and not isinstance(first, (str,bytes)):
             remainder = itertools.chain(first, remainder)
         else:
