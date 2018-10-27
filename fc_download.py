@@ -33,6 +33,7 @@ Example: fcd -c GOOGLE -c BING -s 224 example/guitars.csv
 """
 
 def flatten(iterable: Iterable, ltypes=collections.abc.Iterable) -> Any:
+    """Convert nested into a flat list"""
     remainder = iter(iterable)
     while True:
         first = next(remainder)
@@ -42,6 +43,7 @@ def flatten(iterable: Iterable, ltypes=collections.abc.Iterable) -> Any:
             yield first
 
 def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU']):
+    """Crawl web sites for images"""
     print('(1) Crawling ...')
     # prepare folders
     os.makedirs(folder, exist_ok=True)
@@ -73,7 +75,6 @@ def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', '
 
 def hashfile(path: str, blocksize: int = 65536) -> str:
     """Create hash for file"""
-
     with open(path, 'rb') as f:
         hasher = hashlib.md5()
         buf = f.read(blocksize)
@@ -84,7 +85,6 @@ def hashfile(path: str, blocksize: int = 65536) -> str:
 
 def remove_dups(parent_folder: str, match: str = None):
     """Remove duplicate files"""
-    
     dups = {}
     for dirName, subdirs, files in os.walk(parent_folder):
         for f in files:
@@ -98,7 +98,6 @@ def remove_dups(parent_folder: str, match: str = None):
 
 def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int] = (299, 299)):
     """Resize image to specified size"""
-
     print(f'(2) Resizing images to {size}')
     with tqdm(total=len(files)) as t:
         for fcnt, f in enumerate(files):
@@ -116,10 +115,16 @@ def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int
             out = os.path.join(outpath, fname + '.jpg') 
             bg.save(out)
             t.update(1)
-            
+
+def sanitize_searchstring(s: str, rstring: str = None) -> str:
+    """Convert search term to clean folder string"""
+    if rstring:
+        ritems = rstring.split(',') if ',' in rstring else [rstring]
+        for rs in ritems:
+            s = s.replace(rs.strip(), '')
+    return s.strip().replace('"','').replace('&', 'and').replace(' ', '_')
 
 def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
-
     SIZE=(size,size)
     classes = []
 
@@ -141,19 +146,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
 
         for search_term, remove_terms in classes:
             print(f'Searching: >> {search_term} <<')
-            out_name = search_term
-
-            # preprocessing
-            remove_items = remove_terms.split(',') if ',' in remove_terms else [remove_terms]
-
-            for i in remove_items:
-                out_name = out_name.replace(i.strip(), '')
-
-            out_name = (out_name.strip()
-                                .replace('"','')
-                                .replace('&', 'and')
-                                .replace(' ', '_'))
-
+            out_name = sanitize_searchstring(search_term, rstring=remove_terms)
             raw_folder = os.path.join(tmp, out_name)
 
             crawl(raw_folder, search_term, crawlers=crawler)
