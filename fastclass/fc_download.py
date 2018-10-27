@@ -1,6 +1,6 @@
 #!/usr/bin/env python 
 #
-# fc_download.py
+# fastclass - fc_download.py
 # 
 # Christian Werner, 2018-10-23
 #
@@ -9,21 +9,19 @@
 #  - check if we need grace periods to avoid blocking
  
 import click
-import collections
 import glob
-import hashlib
 from icrawler.builtin import GoogleImageCrawler, BingImageCrawler, BaiduImageCrawler
-import itertools
 import logging
 import os
-from PIL import Image
 import shutil
-import sys
 import tempfile
-from tqdm import tqdm
-from typing import Any, Iterable, List, Optional, Tuple
+from typing import List
 
-EPILOG = """::: FastClass fc_download :::\r
+from . deduplicate import remove_dups
+from . imageprocessing import resize
+from . misc import sanitize_searchstring
+
+EPILOG = """::: FastClass fcd :::\r
 \r
 ...an easy way to crawl the net for images when building a\r
 dataset for deep learning.\r
@@ -32,15 +30,6 @@ Example: fcd -c GOOGLE -c BING -s 224 example/guitars.csv
 
 """
 
-def flatten(iterable: Iterable, ltypes=collections.abc.Iterable) -> Any:
-    """Convert nested into a flat list"""
-    remainder = iter(iterable)
-    while True:
-        first = next(remainder)
-        if isinstance(first, ltypes) and not isinstance(first, (str,bytes)):
-            remainder = itertools.chain(first, remainder)
-        else:
-            yield first
 
 def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU']):
     """Crawl web sites for images"""
@@ -73,56 +62,6 @@ def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', '
             baidu_crawler.crawl(keyword=search, offset=0, max_num=1000,
                                 min_size=(200,200), max_size=None, file_idx_offset='auto')
 
-def hashfile(path: str, blocksize: int = 65536) -> str:
-    """Create hash for file"""
-    with open(path, 'rb') as f:
-        hasher = hashlib.md5()
-        buf = f.read(blocksize)
-        while len(buf) > 0:
-            hasher.update(buf)
-            buf = f.read(blocksize)
-    return hasher.hexdigest()
-
-def remove_dups(parent_folder: str, match: str = None):
-    """Remove duplicate files"""
-    dups = {}
-    for dirName, subdirs, files in os.walk(parent_folder):
-        for f in files:
-            path = os.path.join(dirName, f)
-            dups.setdefault(hashfile(path), []).append(path)
-    dups = flatten([v[1:] for k,v in dups.items() if len(v) > 1])
-
-    print(f"Number of duplicate image files: {len(list(dups))}. Removing...")
-    for dup in dups:
-        os.remove(dup)
-
-def resize(files: List[str], outpath: Optional[str] = None, size: Tuple[int, int] = (299, 299)):
-    """Resize image to specified size"""
-    print(f'(2) Resizing images to {size}')
-    with tqdm(total=len(files)) as t:
-        for fcnt, f in enumerate(files):
-            im = Image.open(f)
-            try:
-                im.thumbnail(size, Image.ANTIALIAS)
-            except OSError:
-                # skip truncated files
-                continue
-            bg = Image.new('RGBA', size, (255, 255, 255, 0))
-            bg.paste(im, (int((size[0] - im.size[0]) / 2), int((size[1] - im.size[1]) / 2)))
-            bg = bg.convert('RGB')
-
-            fname, _ = os.path.splitext(os.path.basename(f))
-            out = os.path.join(outpath, fname + '.jpg') 
-            bg.save(out)
-            t.update(1)
-
-def sanitize_searchstring(s: str, rstring: str = None) -> str:
-    """Convert search term to clean folder string"""
-    if rstring:
-        ritems = rstring.split(',') if ',' in rstring else [rstring]
-        for rs in ritems:
-            s = s.replace(rs.strip(), '')
-    return s.strip().replace('"','').replace('&', 'and').replace(' ', '_')
 
 def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
     SIZE=(size,size)
@@ -141,7 +80,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
     with tempfile.TemporaryDirectory() as tmp:
         for lcnt, line in enumerate(infile):
             if lcnt > 0:
-                search_term, remove_terms = line[:-1].split(';')
+                search_term, remove_terms = line[:-1].split(',')
                 classes.append((search_term, remove_terms))
 
         for search_term, remove_terms in classes:
@@ -190,9 +129,3 @@ def cli(infile, size, crawler, keep, outpath):
 
 if __name__ == "__main__":
     cli()
-
-
-
-
-
-

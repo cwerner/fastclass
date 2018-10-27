@@ -19,7 +19,7 @@ requirements = to_list("""
 
 setup(
     name = 'fastclass',
-    version = 0.1,
+    version = 0.1.1,
 
     packages = find_packages(),
     install_requires = requirements,
@@ -48,8 +48,8 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'fcc=fc_clean:cli',
-            'fcd=fc_download:cli',
+            'fcc=fastclass.fc_clean:cli',
+            'fcd=fastclass.fc_download:cli',
         ],
     },
 

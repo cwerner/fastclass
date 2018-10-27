@@ -1,6 +1,6 @@
 #!/usr/bin/env python 
 #
-# fc_clean.py
+# fastclass - fc_clean.py
 # 
 # Christian Werner, 2018-10-23
 
@@ -12,7 +12,7 @@ from PIL import ImageTk, Image
 import tkinter as tk
 import shutil
 
-EPILOG = """::: FastClass fc_clean :::\r
+EPILOG = """::: FastClass fcc :::\r
 ...a fast way to cleanup/ sort your images when building a\r
 dataset for deep learning.\r
 \r
@@ -257,7 +257,7 @@ click.Context.get_usage = click.Context.get_help
 @click.argument('outfolder', type=click.Path(exists=False), required=False)
 
 def cli(infolder, outfolder, nocopy):
-    """FastClass fc_clean"""
+    """FastClass fcc"""
 
     main(infolder, outfolder, nocopy)
 

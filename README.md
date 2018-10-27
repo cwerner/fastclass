@@ -6,14 +6,13 @@ classify them into groups for building deep learning image datasets.
 
 ```pip install git+https://github.com/cwerner/fastclass.git#egg=fastclass``` 
 
-The installer will also place the executables *fcc* (fc_clean.py) and *fcd* (fc_download.py)
-in your PATH.  
+The installer will also place the executables **fcc** and **fcd** in your $PATH.  
 
 The package currently contains the follwing tools:  
 
 ## Download images 
 
-Use **fc_download.py** to crawl search engines (Google, Bing, Baidu) and pull all images for
+Use **fcd** to crawl search engines (Google, Bing, Baidu) and pull all images for
 a defined set of queries. In addition, files are renamed, scaled and checked
 for duplicates.
 
@@ -31,11 +30,13 @@ Options:
   -c, --crawler [ALL|GOOGLE|BING|BAIDU]
                                   selection of crawler (multiple invocations
                                   supported)  [default: ALL]
+  -k, --keep                      keep original results of crawlers  [default:
+                                  False]
   -s, --size INTEGER              image size for rescaling  [default: 299]
   -o, --outpath TEXT              name of output directory  [default: dataset]
   -h, --help                      Show this message and exit.
 
-  ::: FastClass fc_download :::
+  ::: FastClass fcd :::
 
   ...an easy way to crawl the net for images when building a dataset for
   deep learning.
@@ -45,7 +46,7 @@ Options:
 
 ## Clean image sets
 
-Once downloaded use **fc_clean** to quickly inspect the loaded files and rate or
+Once downloaded use **fcc** to quickly inspect the loaded files and rate or
 classify them. You can also mark them for deletion.
 
 ### Usage
@@ -55,13 +56,13 @@ will show you the help page.
 ```
 Usage: fcc [OPTIONS] INFOLDER [OUTFOLDER]
 
-  FastClass fc_clean
+  FastClass fcc
 
 Options:
   --nocopy TEXT  disable filecopy for cleaned image set  [default: False]
   -h, --help     Show this message and exit.
 
-  ::: FastClass fc_clean ::: ...a fast way to cleanup/ sort your images when
+  ::: FastClass fcc ::: ...a fast way to cleanup/ sort your images when
   building a dataset for deep learning.
 
   Note: In the application use the following keys: <1>, <2>, ... <9> for
