@@ -35,7 +35,7 @@ setup(
     url = 'https://github.com/cwerner/fastclass',
 
     author = "Christian Werner",
-    author_email = 'mydatadude@gmail.com',
+    author_email = 'cwerner.gh@gmail.com',
 
     classifiers = [
         'Development Status :: 3 - Alpha',
