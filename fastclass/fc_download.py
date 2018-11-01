@@ -39,14 +39,16 @@ class CustomDownloader(ImageDownloader, ImageLog):
     def process_meta(self, task):
         ImageLog.registry[task['filename']] = task['file_url']
 
-def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU']) -> Dict[str, str]:
+def crawl(folder: str, search: str, maxnum:int, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU']) -> Dict[str, str]:
     """Crawl web sites for images"""
     print('(1) Crawling ...')
     # prepare folders
     os.makedirs(folder, exist_ok=True)
 
     sources = {}
-    max_num = 1000
+    if maxnum > 1000:
+        print("Max num limited to 1000")
+        maxnum = 1000
 
     for c in crawlers:
         print(f'    -> {c}')
@@ -59,7 +61,7 @@ def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', '
                 downloader_threads=4,
                 storage={'root_dir': folder})
 
-            google_crawler.crawl(keyword=search, offset=0, max_num=max_num,
+            google_crawler.crawl(keyword=search, offset=0, max_num=maxnum,
                                 min_size=(200,200), max_size=None, file_idx_offset=0)
 
         if c == 'BING':
@@ -67,20 +69,20 @@ def crawl(folder: str, search: str, crawlers: [List[str]] = ['GOOGLE', 'BING', '
                                             log_level=logging.CRITICAL,
                                             downloader_threads=4,
                                             storage={'root_dir': folder})
-            bing_crawler.crawl(keyword=search, filters=None, offset=0, max_num=max_num, file_idx_offset='auto')
+            bing_crawler.crawl(keyword=search, filters=None, offset=0, max_num=maxnum, file_idx_offset='auto')
 
 
         if c == 'BAIDU':
             baidu_crawler = BaiduImageCrawler(downloader_cls=CustomDownloader,
                                     log_level=logging.CRITICAL,
                                     storage={'root_dir': folder})
-            baidu_crawler.crawl(keyword=search, offset=0, max_num=max_num,
+            baidu_crawler.crawl(keyword=search, offset=0, max_num=maxnum,
                                 min_size=(200,200), max_size=None, file_idx_offset='auto')
 
 
     return {k: v for k, v in CustomDownloader.registry.items() if k is not None}
 
-def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
+def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, outpath: str):
     SIZE=(size,size)
     classes = []
 
@@ -105,7 +107,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, outpath: str):
             out_name = sanitize_searchstring(search_term, rstring=remove_terms)
             raw_folder = os.path.join(tmp, out_name)
 
-            source_urls = crawl(raw_folder, search_term, crawlers=crawler)
+            source_urls = crawl(raw_folder, search_term, maxnum, crawlers=crawler)
             remove_dups(raw_folder)
 
             # resize
@@ -138,6 +140,9 @@ click.Context.get_usage = click.Context.get_help
 @click.option('-k', '--keep',  default=False, is_flag=True, show_default=True,
                     help='keep original results of crawlers')
 
+@click.option('-m', '--maxnum', default=1000, show_default=True, type=int, 
+                    help='maximum number of images per crawler (lower is faster, 1000 is max)')
+
 @click.option('-s', '--size',  default=299, show_default=True, type=int,
                     help='image size for rescaling')
 
@@ -146,8 +151,8 @@ click.Context.get_usage = click.Context.get_help
 
 @click.argument('infile', type=click.File('r'), required=True)
 
-def cli(infile, size, crawler, keep, outpath):
-    main(infile, size, crawler, keep, outpath)
+def cli(infile, size, crawler, keep, maxnum, outpath):
+    main(infile, size, crawler, keep, maxnum, outpath)
 
 if __name__ == "__main__":
     cli()
