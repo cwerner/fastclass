@@ -115,6 +115,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
             os.makedirs(out_resized, exist_ok=True)
 
             files = sorted(glob.glob(raw_folder+'/*'))
+
             source_urls = resize(files, outpath=out_resized, size=SIZE, urls=source_urls)
 
             # write report file
