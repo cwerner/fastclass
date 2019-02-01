@@ -36,13 +36,13 @@ def resize(files: List[str], \
                 except OSError:
                     # skip truncated files
                     continue
-            
+
                 bg = Image.new('RGBA', size, (255, 255, 255, 0))
                 bg.paste(im, (int((size[0] - im.size[0]) / 2), int((size[1] - im.size[1]) / 2)))
-                bg = bg.convert('RGB')
+
             else:
                 bg = im
-
+            bg = bg.convert('RGB')
             fname, _ = os.path.splitext(os.path.basename(f))
             out = os.path.join(outpath, fname + '.jpg')
             bg.save(out)
