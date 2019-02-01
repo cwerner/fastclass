@@ -30,12 +30,13 @@ def resize(files: List[str], \
     with tqdm(total=len(files)) as t:
         for fcnt, f in enumerate(files):
             im = Image.open(f)
-            try:
-                im.thumbnail(size, Image.ANTIALIAS)
-            except OSError:
-                # skip truncated files
-                continue
             if (should_resize):
+                try:
+                    im.thumbnail(size, Image.ANTIALIAS)
+                except OSError:
+                    # skip truncated files
+                    continue
+            
                 bg = Image.new('RGBA', size, (255, 255, 255, 0))
                 bg.paste(im, (int((size[0] - im.size[0]) / 2), int((size[1] - im.size[1]) / 2)))
                 bg = bg.convert('RGB')
@@ -43,7 +44,7 @@ def resize(files: List[str], \
                 bg = im
 
             fname, _ = os.path.splitext(os.path.basename(f))
-            out = os.path.join(outpath, fname + '.jpg') 
+            out = os.path.join(outpath, fname + '.jpg')
             bg.save(out)
 
             if urls:
