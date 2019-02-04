@@ -17,7 +17,11 @@ def resize(files: List[str], \
            size: Tuple[int, int] = (299, 299), \
            urls: Optional[Dict[str, str]] = None) -> Optional[Dict[str, str]]:
     """Resize image to specified size"""
-    print(f'(2) Resizing images to {size}')
+    should_resize = (size[0] > 0 and size[1] > 0)
+    if (should_resize):
+        print(f'(2) Resizing images to {size}')
+    else:
+        print("Not resizing images")
 
     sources = None
     if urls:
@@ -26,17 +30,21 @@ def resize(files: List[str], \
     with tqdm(total=len(files)) as t:
         for fcnt, f in enumerate(files):
             im = Image.open(f)
-            try:
-                im.thumbnail(size, Image.ANTIALIAS)
-            except OSError:
-                # skip truncated files
-                continue
-            bg = Image.new('RGBA', size, (255, 255, 255, 0))
-            bg.paste(im, (int((size[0] - im.size[0]) / 2), int((size[1] - im.size[1]) / 2)))
-            bg = bg.convert('RGB')
+            if (should_resize):
+                try:
+                    im.thumbnail(size, Image.ANTIALIAS)
+                except OSError:
+                    # skip truncated files
+                    continue
 
+                bg = Image.new('RGBA', size, (255, 255, 255, 0))
+                bg.paste(im, (int((size[0] - im.size[0]) / 2), int((size[1] - im.size[1]) / 2)))
+
+            else:
+                bg = im
+            bg = bg.convert('RGB')
             fname, _ = os.path.splitext(os.path.basename(f))
-            out = os.path.join(outpath, fname + '.jpg') 
+            out = os.path.join(outpath, fname + '.jpg')
             bg.save(out)
 
             if urls:

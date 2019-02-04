@@ -115,6 +115,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
             os.makedirs(out_resized, exist_ok=True)
 
             files = sorted(glob.glob(raw_folder+'/*'))
+
             source_urls = resize(files, outpath=out_resized, size=SIZE, urls=source_urls)
 
             # write report file
@@ -144,7 +145,7 @@ click.Context.get_usage = click.Context.get_help
                     help='maximum number of images per crawler (lower is faster, 1000 is max)')
 
 @click.option('-s', '--size',  default=299, show_default=True, type=int,
-                    help='image size for rescaling')
+                    help='image size for rescaling. Set to 0 to keep original size.')
 
 @click.option('-o', '--outpath',  default='dataset', show_default=True,
                     help='name of output directory')
