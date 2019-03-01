@@ -90,11 +90,18 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
         crawler = ['GOOGLE', 'BING', 'BAIDU']
 
     if os.path.isdir(outpath):
-        print(f'Directory "{outpath}" exists. Please specify another one using -o')
-        exit(-1)
-    else:
-        os.makedirs(outpath)
-        print(f'INFO: final dataset will be located in {outpath}')
+        print(f'Directory "{outpath}" exists. Would you like to overwrite the directory? [y/n]')
+        choice = input().lower()
+        while (not (choice is 'y' or 'n')):
+            print("Please reply with 'y' or 'n'")
+            choice = input().lower()
+        if (choice == 'y'):
+            shutil.rmtree(outpath)
+        else:
+            exit(-1)
+
+    os.makedirs(outpath)
+    print(f'INFO: final dataset will be located in {outpath}')
 
     with tempfile.TemporaryDirectory() as tmp:
         for lcnt, line in enumerate(infile):
