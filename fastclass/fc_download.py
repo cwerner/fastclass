@@ -1,13 +1,13 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
 #
 # fastclass - fc_download.py
-# 
+#
 # Christian Werner, 2018-10-23
 #
-# TODO: 
-#  - print report (images per class etc) 
+# TODO:
+#  - print report (images per class etc)
 #  - check if we need grace periods to avoid blocking
- 
+
 import click
 import glob
 from icrawler import ImageDownloader
@@ -94,7 +94,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
         exit(-1)
     else:
         os.makedirs(outpath)
-        print(f'INFO: final dataset will be located i {outpath}')
+        print(f'INFO: final dataset will be located in {outpath}')
 
     with tempfile.TemporaryDirectory() as tmp:
         for lcnt, line in enumerate(infile):
@@ -133,7 +133,7 @@ click.Context.get_usage = click.Context.get_help
 
 @click.command(context_settings=CONTEXT_SETTINGS, epilog=EPILOG)
 
-@click.option('-c', '--crawler', default=['ALL'], 
+@click.option('-c', '--crawler', default=['ALL'],
                     type=click.Choice(['ALL','GOOGLE', 'BING', 'BAIDU']),
                     show_default=True, multiple=True,
                     help='selection of crawler (multiple invocations supported)')
@@ -141,7 +141,7 @@ click.Context.get_usage = click.Context.get_help
 @click.option('-k', '--keep',  default=False, is_flag=True, show_default=True,
                     help='keep original results of crawlers')
 
-@click.option('-m', '--maxnum', default=1000, show_default=True, type=int, 
+@click.option('-m', '--maxnum', default=1000, show_default=True, type=int,
                     help='maximum number of images per crawler (lower is faster, 1000 is max)')
 
 @click.option('-s', '--size',  default=299, show_default=True, type=int,
