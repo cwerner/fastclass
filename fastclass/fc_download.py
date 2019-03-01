@@ -87,7 +87,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
     classes = []
 
     if 'ALL' in crawler:
-        crawler = ['GOOGLE', 'BING', 'BAIDU']
+        crawler = ['GOOGLE', 'BING']
 
     if os.path.isdir(outpath):
         print(f'Directory "{outpath}" exists. Would you like to overwrite the directory? [y/n]')
