@@ -4,23 +4,23 @@ classify them into groups for building deep learning image datasets.
 
 ## Installation
 
-```pip install git+https://github.com/cwerner/fastclass.git#egg=fastclass``` 
+```pip install git+https://github.com/cwerner/fastclass.git#egg=fastclass```
 
 The installer will also place the executables **fcc** and **fcd** in your $PATH.  
 
 The package currently contains the follwing tools:  
 
-## Download images 
+## Download images
 
 Use **fcd** to crawl search engines (Google, Bing, Baidu) and pull all images for
 a defined set of queries. In addition, files are renamed, scaled and checked
 for duplicates.
 
 You provide queries and terms that should be excluded when naming the category folders. There
-is an example (guitars.csv) provided in the repository. 
+is an example (guitars.csv) provided in the repository.
 
 ### Usage
-Call the script from the commandline. If you omit any input parameters it 
+Call the script from the commandline. If you omit any input parameters it
 will show you the help page.
 
 ```
@@ -29,9 +29,10 @@ Usage: fcd [OPTIONS] INFILE
 Options:
   -c, --crawler [ALL|GOOGLE|BING|BAIDU]
                                   selection of crawler (multiple invocations
-                                  supported)  [default: ALL]
+                                  supported)  [default: ALL] (Note: BAIDU is not included in ALL option)
   -k, --keep                      keep original results of crawlers  [default:
                                   False]
+  -m, --maxnum                    maximum number of images per crawler [default: 1000]
   -s, --size INTEGER              image size for rescaling  [default: 299]
   -o, --outpath TEXT              name of output directory  [default: dataset]
   -h, --help                      Show this message and exit.
@@ -77,6 +78,3 @@ Options:
   In the output csv file 1,2 depcit class assignments/ ratings,  -1
   indicates files marked for deletion (if not excluded with -d).
 ```
-
-
-
