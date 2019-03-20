@@ -67,7 +67,7 @@ class AppTk(tk.Frame):
         suffixes += [x.upper() for x in suffixes]
         files = list(itertools.chain(*[glob.glob(f'{INFOLDER}/*.{x}') for x in suffixes]))
 
-        self.filelist = sorted(files)
+        self.filelist = sorted(set(files))
         if len(self.filelist) == 0:
             print('No files in infolder.')
             exit(-1)
