@@ -7,6 +7,7 @@
 import collections
 import itertools
 from typing import Any, Iterable
+import re
 
 # some helper functions
 
@@ -29,4 +30,6 @@ def sanitize_searchstring(s: str, rstring: str = None) -> str:
         ritems = rstring.strip().split(' ') if ' ' in rstring else [rstring]
         for rs in ritems:
             s = s.replace(rs.strip(), '')
-    return s.strip().replace('"','').replace('&', 'and').replace(' ', '_')
+    
+    s = str(s).strip().replace(' ', '_').replace('&', 'and')
+    return re.sub(r'(?u)[^-\w.]', '', s)
