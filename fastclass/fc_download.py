@@ -126,7 +126,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
             source_urls = resize(files, outpath=out_resized, size=SIZE, urls=source_urls)
 
             # write report file
-            with open(out_resized + '.log', 'w') as log:
+            with open(out_resized + '.log', 'w', encoding="utf-8") as log:
                 log.write('image,source\n')
                 for item in source_urls:
                     log.write(','.join([item, source_urls[item]]) + '\n')
