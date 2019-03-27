@@ -67,7 +67,7 @@ class AppTk(tk.Frame):
         suffixes += [x.upper() for x in suffixes]
         files = list(itertools.chain(*[glob.glob(f'{INFOLDER}/*.{x}') for x in suffixes]))
 
-        self.filelist = sorted(files)
+        self.filelist = sorted(set(files))
         if len(self.filelist) == 0:
             print('No files in infolder.')
             exit(-1)
@@ -129,18 +129,18 @@ class AppTk(tk.Frame):
             self._class[f'c{char}'].add(self.filelist[self._index]) 
             self.display_next()
 
-        if event.char in '123456789':
-            button_action(event.char)
+        if event.keysym in '123456789':
+            button_action(event.keysym)
         elif event.keysym == 'space': #'<space>':
             button_action('1')
-        elif event.char == 'd':
+        elif event.keysym == 'd':
             self._delete.add(self.filelist[self._index])
             self.display_next()
         elif event.keysym == 'Left': #'<Left>':
             self.display_prev()
         elif event.keysym == 'Right': #'<Right>':
             self.display_next()
-        elif event.char == "x":
+        elif event.keysym == "x":
 
             # write report file
             rows_all = []

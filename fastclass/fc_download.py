@@ -108,9 +108,9 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
             if lcnt > 0:
                 search_term, remove_terms = line[:-1].split(',')
                 classes.append((search_term, remove_terms))
-
-        for search_term, remove_terms in classes:
-            print(f'Searching: >> {search_term} <<')
+                
+        for i, (search_term, remove_terms) in enumerate(classes):
+            print(f'[{i+1}/{len(classes)}] Searching: >> {search_term} <<')
             out_name = sanitize_searchstring(search_term, rstring=remove_terms)
             raw_folder = os.path.join(tmp, out_name)
 
@@ -126,7 +126,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
             source_urls = resize(files, outpath=out_resized, size=SIZE, urls=source_urls)
 
             # write report file
-            with open(out_resized + '.log', 'w') as log:
+            with open(out_resized + '.log', 'w', encoding="utf-8") as log:
                 log.write('image,source\n')
                 for item in source_urls:
                     log.write(','.join([item, source_urls[item]]) + '\n')
