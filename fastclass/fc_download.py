@@ -106,7 +106,12 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
     with tempfile.TemporaryDirectory() as tmp:
         for lcnt, line in enumerate(infile):
             if lcnt > 0:
-                search_term, remove_terms = line[:-1].split(',')
+                no_cols = line[:-1].count(',')+1
+                if no_cols>1:
+                    search_term, remove_terms = line[:-1].split(',')
+                else:
+                    search_term = line[:-1]
+                    remove_terms = None
                 classes.append((search_term, remove_terms))
                 
         for i, (search_term, remove_terms) in enumerate(classes):
