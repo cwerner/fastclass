@@ -151,7 +151,7 @@ click.Context.get_usage = click.Context.get_help
                     help='selection of crawler (multiple invocations supported)')
 
 @click.option('-k', '--keep',  default=False, is_flag=True, show_default=True,
-                    help='keep original results of crawlers')
+                    help='keep original results of crawlers (copy them to .raw folder')
 
 @click.option('-m', '--maxnum', default=1000, show_default=True, type=int,
                     help='maximum number of images per crawler (lower is faster, 1000 is max)')
