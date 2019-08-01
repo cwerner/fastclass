@@ -97,6 +97,8 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum:int, out
             choice = input().lower()
         if (choice == 'y'):
             shutil.rmtree(outpath)
+            if os.path.isdir(outpath+'.raw'):
+                shutil.rmtree(outpath+'.raw')
         else:
             exit(-1)
 
