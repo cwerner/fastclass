@@ -48,7 +48,7 @@ Options:
 If you specify the *-k, --keep* flag a second folder called outpath.raw containing the original/ unscled images will be created.  
 
 ### Search file format
-The csv file currently requires two columns (columns are seperated by a comma (,)) and each row defines a image class you want to download (see the guitars.csv file in the example folder).  
+The csv file currently requires two columns (columns are seperated by a comma (,)) and each row defines a image class you want to download (see the guitars.csv file in the example folder). The first row contains a header which will be skipped. 
 
 Column 1 contains the search terms. You can specify multiple searchterms using space between them. If you want to require a search time enclose it in quotation marks ("). In column 2 you can specify terms that should *not* be included in the search. If you do not want to specify this column you can leave it blank (i.e., end the line with a comma).   
 
