@@ -31,7 +31,7 @@ is given in the title bar (X indicated a mark for deletion).\r
 The counter in the titlebar gives number of classified images\r
 vs the total number in the input folder.\r
 
-In the output csv file 1,2 depcit class assignments/ ratings, 
+In the output csv file 1,2 indicate class assignments/ ratings, 
 -1 indicates files marked for deletion (if not excluded with -d)."""
 
 
@@ -41,16 +41,12 @@ class AppTk(tk.Frame):
         INFOLDER = kwargs['infolder']
         OUTFOLDER = kwargs['outfolder']
 
-        if OUTFOLDER:
-            pass
-        else:
+        if not OUTFOLDER:
             OUTFOLDER = INFOLDER + '.clean'
             os.makedirs(OUTFOLDER, exist_ok=True)
 
         NOCOPY = kwargs['nocopy']
- 
-        for e in ['infolder', 'outfolder', 'nocopy']:
-            kwargs.pop(e)
+        [kwargs.pop(e) for e in ['infolder', 'outfolder', 'nocopy']
 
         tk.Frame.__init__(self,*args,**kwargs)
 
