@@ -38,6 +38,8 @@ In the output csv file 1,2 indicate class assignments/ ratings,
 suffixes = ['jpg', 'jpeg', 'png', 'tif', 'tiff']
 suffixes += [x.upper() for x in suffixes]
 
+digits = '123456789'
+
 class AppTk(tk.Frame):
     def __init__(self, parent, **kwargs):
 
@@ -60,7 +62,7 @@ class AppTk(tk.Frame):
         self.parent.bind('<Key>', self.callback)
 
         # store classification
-        self._class = {f'c{c}': set() for c in range(1,10)}
+        self._class = {f'c{d}': set() for d in digits}
         self._delete = set()
 
         files = list(itertools.chain(*[glob.glob(f'{INFOLDER}/*.{x}') for x in suffixes]))
@@ -96,9 +98,9 @@ class AppTk(tk.Frame):
     @property
     def classified(self):
         cnt = 0
-        for c in '123456789':
-            if self.filelist[self._index] in self._class[f'c{c}']:
-                cnt += len(self._class[f'c{c}'])            
+        for d in digits:
+            if self.filelist[self._index] in self._class[f'c{d}']:
+                cnt += len(self._class[f'c{d}'])            
         if self.filelist[self._index] in self._delete: 
             cnt += len(self._delete)
         return cnt 
@@ -107,9 +109,9 @@ class AppTk(tk.Frame):
     def title(self):
 
         def get_class():
-            for c in '123456789':
-                if self.filelist[self._index] in self._class[f'c{c}']:
-                    return f'[ {c} ] '
+            for d in digits:
+                if self.filelist[self._index] in self._class[f'c{d}']:
+                    return f'[ {d} ] '
             if self.filelist[self._index] in self._delete: 
                 return '[ X ] '
             return '[   ] '
@@ -127,7 +129,7 @@ class AppTk(tk.Frame):
             self._class[f'c{char}'].add(self.filelist[self._index]) 
             self.display_next()
 
-        if event.keysym in '123456789':
+        if event.keysym in digits:
             button_action(event.keysym)
         elif event.keysym == 'space': #'<space>':
             button_action('1')
@@ -144,9 +146,9 @@ class AppTk(tk.Frame):
             rows_all, rows_clean = [], []
             for f in self.filelist:
                 row = (f, '?')
-                for c in '123456789':
-                    if f in self._class[f'c{c}']:
-                        row = (f, c)
+                for d in digits:
+                    if f in self._class[f'c{d}']:
+                        row = (f, d)
                 
                 row = (f, 'D') if f in self._delete else rows_clean.append(row)
                 rows_all.append(row)
@@ -168,10 +170,10 @@ class AppTk(tk.Frame):
     def setup(self):
         self.Label=tk.Label(self)
         self.Label.grid(row=0, column=0, columnspan=6, rowspan=6) #, sticky=tk.N+tk.S)
-        self.Button=tk.Button(self, text="Prev", command=self.display_prev)
-        self.Button.grid(row=5, column=7, sticky=tk.S)
-        self.Button=tk.Button(self, text="Next", command=self.display_next)
-        self.Button.grid(row=5, column=8, sticky=tk.S)
+        self.Button1=tk.Button(self, text="Prev", command=self.display_prev)
+        self.Button1.grid(row=5, column=7, sticky=tk.S)
+        self.Button2=tk.Button(self, text="Next", command=self.display_next)
+        self.Button2.grid(row=5, column=8, sticky=tk.S)
 
     def display_next(self):
         self.print_titlebar()
