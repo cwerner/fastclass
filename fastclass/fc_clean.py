@@ -92,41 +92,45 @@ class AppTk(tk.Frame):
         self.display_next()
     
     @property
-    def total(self):
-        return len(self.filelist)
-        
+    def cur_file(self):
+        return self.filelist[self._index]
+
     @property
-    def classified(self):
+    def no_classified(self):
         cnt = 0
         for d in digits:
-            if self.filelist[self._index] in self._class[f'c{d}']:
+            if self.cur_file in self._class[f'c{d}']:
                 cnt += len(self._class[f'c{d}'])            
-        if self.filelist[self._index] in self._delete: 
+        if self.cur_file in self._delete: 
             cnt += len(self._delete)
         return cnt 
+
+    @property
+    def no_total(self):
+        return len(self.filelist)
 
     @property
     def title(self):
 
         def get_class():
             for d in digits:
-                if self.filelist[self._index] in self._class[f'c{d}']:
+                if self.cur_file in self._class[f'c{d}']:
                     return f'[ {d} ] '
-            if self.filelist[self._index] in self._delete: 
+            if self.cur_file in self._delete: 
                 return '[ X ] '
             return '[   ] '
 
-        return (os.path.basename( self.filelist[self._index]) + 
+        return (os.path.basename( self.cur_file ) + 
                 " - " +
                 get_class() + 
-                f" ({self.classified}/{self.total})")
+                f" ({self.no_classified}/{self.no_total})")
 
     def print_titlebar(self):
         self.parent.title(self.title)
 
     def callback(self, event=None):
         def button_action(char):
-            self._class[f'c{char}'].add(self.filelist[self._index]) 
+            self._class[f'c{char}'].add(self.cur_file) 
             self.display_next()
 
         if event.keysym in digits:
@@ -134,7 +138,7 @@ class AppTk(tk.Frame):
         elif event.keysym == 'space': #'<space>':
             button_action('1')
         elif event.keysym == 'd':
-            self._delete.add(self.filelist[self._index])
+            self._delete.add(self.cur_file)
             self.display_next()
         elif event.keysym == 'Left': #'<Left>':
             self.display_prev()
@@ -150,7 +154,10 @@ class AppTk(tk.Frame):
                     if f in self._class[f'c{d}']:
                         row = (f, d)
                 
-                row = (f, 'D') if f in self._delete else rows_clean.append(row)
+                if f in self._delete:
+                    row = (f, 'D')
+                else:
+                    rows_clean.append(row)
                 rows_all.append(row)
 
             for ftype, rows in zip(['all', 'clean'], [rows_all, rows_clean]):
@@ -179,7 +186,7 @@ class AppTk(tk.Frame):
         self.print_titlebar()
         self._index+=1
         try:
-            f=self.filelist[self._index]
+            f=self.cur_file
         except IndexError:
             self._index=-1  #go back to the beginning of the list.
             self.display_next()
@@ -196,7 +203,7 @@ class AppTk(tk.Frame):
 
         self._index-=1
         try:
-            f=self.filelist[self._index]
+            f = self.cur_file
         except IndexError:
             self._index=-1  #go back to the beginning of the list.
             self.display_next()
