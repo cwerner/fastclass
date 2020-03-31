@@ -34,6 +34,9 @@ vs the total number in the input folder.\r
 In the output csv file 1,2 indicate class assignments/ ratings, 
 -1 indicates files marked for deletion (if not excluded with -d)."""
 
+# supported suffixes
+suffixes = ['jpg', 'jpeg', 'png', 'tif', 'tiff']
+suffixes += [x.upper() for x in suffixes]
 
 class AppTk(tk.Frame):
     def __init__(self, parent, **kwargs):
@@ -58,9 +61,6 @@ class AppTk(tk.Frame):
         self._class = {f'c{c}': set() for c in range(1,10)}
         self._delete = set()
 
-        # config settings
-        suffixes = ['jpg', 'jpeg', 'png', 'tif', 'tiff']
-        suffixes += [x.upper() for x in suffixes]
         files = list(itertools.chain(*[glob.glob(f'{INFOLDER}/*.{x}') for x in suffixes]))
 
         self.filelist = sorted(set(files))
