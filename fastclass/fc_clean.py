@@ -36,7 +36,7 @@ In the output csv file 1,2 indicate class assignments/ ratings,
 
 
 class AppTk(tk.Frame):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, parent, **kwargs):
 
         INFOLDER = kwargs['infolder']
         OUTFOLDER = kwargs['outfolder']
@@ -48,11 +48,11 @@ class AppTk(tk.Frame):
         NOCOPY = kwargs['nocopy']
         [kwargs.pop(e) for e in ['infolder', 'outfolder', 'nocopy']]
 
-        tk.Frame.__init__(self,*args,**kwargs)
+        tk.Frame.__init__(self, parent, **kwargs)
+        self.parent = parent
 
         # bind keys
-        args[0].bind('<Key>', self.callback)
-        self.root = args[0]
+        self.parent.bind('<Key>', self.callback)
 
         # store classification
         self._class = {f'c{c}': set() for c in range(1,10)}
@@ -81,8 +81,8 @@ class AppTk(tk.Frame):
         self.setup()
 
         # raise window to top
-        self.root.lift()
-        self.root.attributes("-topmost", True)
+        self.parent.lift()
+        self.parent.attributes("-topmost", True)
         
         # show first image
         self.display_next()
@@ -118,7 +118,7 @@ class AppTk(tk.Frame):
                 f" ({self.classified}/{self.total})")
 
     def print_titlebar(self):
-        self.root.title(self.title)
+        self.parent.title(self.title)
 
     def callback(self, event=None):
         def button_action(char):
@@ -164,7 +164,7 @@ class AppTk(tk.Frame):
                 for r in rows_clean:
                     shutil.copy(r[0], self.outfolder)    
 
-            self.root.destroy()
+            self.parent.destroy()
         else:
             pass
 
