@@ -46,7 +46,7 @@ class AppTk(tk.Frame):
             os.makedirs(OUTFOLDER, exist_ok=True)
 
         NOCOPY = kwargs['nocopy']
-        [kwargs.pop(e) for e in ['infolder', 'outfolder', 'nocopy']
+        [kwargs.pop(e) for e in ['infolder', 'outfolder', 'nocopy']]
 
         tk.Frame.__init__(self,*args,**kwargs)
 
@@ -73,7 +73,7 @@ class AppTk(tk.Frame):
         self.nocopy = NOCOPY
 
         self._classified = 0
-        self._index=-1
+        self._index = -1
         
         self.size = (299, 299)
 
