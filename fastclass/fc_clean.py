@@ -49,6 +49,8 @@ class AppTk(tk.Frame):
             os.makedirs(OUTFOLDER, exist_ok=True)
 
         NOCOPY = kwargs['nocopy']
+
+        # remove this kwargs before passing them into tk frame
         [kwargs.pop(e) for e in ['infolder', 'outfolder', 'nocopy']]
 
         tk.Frame.__init__(self, parent, **kwargs)
@@ -139,26 +141,21 @@ class AppTk(tk.Frame):
         elif event.keysym == "x":
 
             # write report file
-            rows_all = []
-            rows_clean = []
+            rows_all, rows_clean = [], []
             for f in self.filelist:
                 row = (f, '?')
                 for c in '123456789':
                     if f in self._class[f'c{c}']:
                         row = (f, c)
-                if f in self._delete: 
-                    row = (f, 'D')
-                else:
-                    rows_clean.append(row) 
+                
+                row = (f, 'D') if f in self._delete else rows_clean.append(row)
                 rows_all.append(row)
 
-            with open(os.path.join(self.infolder.replace(' ','_') + '_report_all.csv'), 'w') as f:
-                f.write('file;rank\n')
-                for row in rows_all: f.write(';'.join(row) + '\n')
-
-            with open(os.path.join(self.infolder.replace(' ','_') + '_report_clean.csv'), 'w') as f:
-                f.write('file;rank\n')
-                for row in rows_clean: f.write(';'.join(row) + '\n')                
+            for ftype, rows in zip(['all', 'clean'], [rows_all, rows_clean]):
+                with open(os.path.join(self.infolder.replace(' ','_') + '_report_%s.csv' % ftype), 'w') as f:
+                    f.write('file;rank\n')
+                    for row in rows:
+                        f.write(';'.join(row) + '\n')
 
             if not self.nocopy:
                 for r in rows_clean:
