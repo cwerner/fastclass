@@ -48,7 +48,6 @@ def crawl(folder: str, search: str, maxnum: int, crawlers: [List[str]] = ['GOOGL
     # prepare folders
     os.makedirs(folder, exist_ok=True)
 
-    sources = {}
     if maxnum > 1000:
         print("Max num limited to 1000")
         maxnum = 1000
@@ -104,7 +103,7 @@ def main(infile: str, size: int, crawler: List[str], keep: bool, maxnum: int, ou
         print(
             f'Directory "{outpath}" exists. Would you like to overwrite the directory? [y/n]')
         choice = input().lower()
-        while (not (choice is 'y' or 'n')):
+        while (not (choice == 'y' or 'n')):
             print("Please reply with 'y' or 'n'")
             choice = input().lower()
         if (choice == 'y'):
