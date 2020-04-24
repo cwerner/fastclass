@@ -11,7 +11,7 @@
 import click
 import glob
 from icrawler import ImageDownloader
-from icrawler.builtin import GoogleImageCrawler, BingImageCrawler, BaiduImageCrawler
+from icrawler.builtin import GoogleImageCrawler, BingImageCrawler, BaiduImageCrawler, FlickrImageCrawler
 import logging
 import os
 import shutil
@@ -42,7 +42,7 @@ class CustomDownloader(ImageDownloader, ImageLog):
         ImageLog.registry[task['filename']] = task['file_url']
 
 
-def crawl(folder: str, search: str, maxnum: int, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU']) -> Dict[str, str]:
+def crawl(folder: str, search: str, maxnum: int, crawlers: [List[str]] = ['GOOGLE', 'BING', 'BAIDU', 'FLICKR']) -> Dict[str, str]:
     """Crawl web sites for images"""
     print('(1) Crawling ...')
     # prepare folders
@@ -81,6 +81,14 @@ def crawl(folder: str, search: str, maxnum: int, crawlers: [List[str]] = ['GOOGL
                                               storage={'root_dir': folder})
             baidu_crawler.crawl(keyword=search, offset=0, max_num=maxnum,
                                 min_size=(200, 200), max_size=None, file_idx_offset='auto')
+
+        if c == 'FLICKR':
+            flick_api_key = os.environ['FLICKR_API_KEY']
+
+            flickr_crawler = FlickrImageCrawler(
+                flick_api_key, downloader_cls=CustomDownloader, log_level=logging.CRITICAL, storage={'root_dir': folder})
+            flickr_crawler.crawl(text=search, offset=0, max_num=maxnum, min_size=(
+                200, 200), max_size=None, file_idx_offset='auto')
 
     return {k: v for k, v in CustomDownloader.registry.items() if k is not None}
 
@@ -154,7 +162,8 @@ click.Context.get_usage = click.Context.get_help
 
 @click.command(context_settings=CONTEXT_SETTINGS, epilog=EPILOG)
 @click.option('-c', '--crawler', default=['ALL'],
-                    type=click.Choice(['ALL', 'GOOGLE', 'BING', 'BAIDU']),
+                    type=click.Choice(
+                        ['ALL', 'GOOGLE', 'BING', 'BAIDU', 'FLICKR']),
                     show_default=True, multiple=True,
                     help='selection of crawler (multiple invocations supported)')
 @click.option('-k', '--keep',  default=False, is_flag=True, show_default=True,
