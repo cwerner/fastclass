@@ -82,7 +82,11 @@ def crawl(folder: str, search: str, maxnum: int, crawlers: [List[str]] = ['GOOGL
                                 min_size=(200, 200), max_size=None, file_idx_offset='auto')
 
         if c == 'FLICKR':
-            flick_api_key = os.environ['FLICKR_API_KEY']
+            flick_api_key = os.environ.get('FLICKR_API_KEY')
+            if not flick_api_key:
+                print(
+                    'Error: Flickr crawler requires FLICKR_API_KEY environment variable to be set with your non-secret API key.')
+                exit(-1)
 
             flickr_crawler = FlickrImageCrawler(
                 flick_api_key, downloader_cls=CustomDownloader, log_level=logging.CRITICAL, storage={'root_dir': folder})
