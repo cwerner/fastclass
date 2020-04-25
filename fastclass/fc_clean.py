@@ -6,10 +6,11 @@
 
 import click
 import glob
-import itertools
+import itertools as it
 import os
 from PIL import ImageTk, Image
 import tkinter as tk
+from tkinter import ttk
 import shutil
 
 from .imageprocessing import image_pad
@@ -53,7 +54,7 @@ class AppTk(tk.Frame):
 
         NOCOPY = kwargs["nocopy"]
 
-        # remove this kwargs before passing them into tk frame
+        # remove these kwargs before passing them into tk frame
         [kwargs.pop(e) for e in ["infolder", "outfolder", "nocopy"]]
 
         tk.Frame.__init__(self, parent, **kwargs)
@@ -66,9 +67,7 @@ class AppTk(tk.Frame):
         self._class = {f"c{d}": set() for d in digits}
         self._delete = set()
 
-        files = list(
-            itertools.chain(*[glob.glob(f"{INFOLDER}/*.{x}") for x in suffixes])
-        )
+        files = list(it.chain(*[glob.glob(f"{INFOLDER}/*.{x}") for x in suffixes]))
 
         self.filelist = sorted(set(files))
         if len(self.filelist) == 0:
@@ -186,9 +185,9 @@ class AppTk(tk.Frame):
     def setup(self):
         self.Label = tk.Label(self)
         self.Label.grid(row=0, column=0, columnspan=6, rowspan=6)  # , sticky=tk.N+tk.S)
-        self.Button1 = tk.Button(self, text="Prev", command=self.display_prev)
+        self.Button1 = ttk.Button(self, text="Prev", command=self.display_prev)
         self.Button1.grid(row=5, column=7, sticky=tk.S)
-        self.Button2 = tk.Button(self, text="Next", command=self.display_next)
+        self.Button2 = ttk.Button(self, text="Next", command=self.display_next)
         self.Button2.grid(row=5, column=8, sticky=tk.S)
 
     def display_next(self):
