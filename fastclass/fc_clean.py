@@ -5,7 +5,8 @@
 # Christian Werner, 2018-10-23
 
 import click
-import glob
+from collections import deque
+from functools import partial
 import itertools as it
 import os
 from pathlib import Path
@@ -43,6 +44,49 @@ suffixes += [x.upper() for x in suffixes]
 digits = "123456789"
 
 
+class Item(object):
+    def __init__(self, image_path, size):
+        self.image_path = image_path
+        self.label = None
+        self.size = size
+
+    def __repr__(self):
+        return f"Item <{self.image_path} [{self.label if self.label else None}]>"
+
+    def show(self):
+        return ImageTk.PhotoImage(image_pad(self.image_path, self.size))
+
+
+class ItemList(object):
+    def __init__(self, items=[], size=(299, 299)):
+        self._data = deque([Item(i, size) for i in items])
+        self._initial = True
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __len__(self):
+        return len(self._data)
+
+    def __repr__(self):
+        return ", ".join([str(x) for x in self._data])
+
+    def forward(self):
+        self._data.rotate(-1)
+
+    def backward(self):
+        self._data.rotate(1)
+
+    @property
+    def current(self):
+        if len(self._data) > 0:
+            return self._data[0]
+
+    @property
+    def labels(self):
+        return [x.label for x in self._data]
+
+
 class AppTk(tk.Frame):
     def __init__(self, parent, **kwargs):
 
@@ -66,10 +110,6 @@ class AppTk(tk.Frame):
         # bind keys
         self.parent.bind("<Key>", self.callback)
 
-        # store classification
-        self._class = {f"c{d}": set() for d in digits}
-        self._delete = set()
-
         files = list(it.chain(*[INFOLDER.glob(f"*.{x}") for x in suffixes]))
 
         self.filelist = sorted(set(files))
@@ -77,14 +117,11 @@ class AppTk(tk.Frame):
             print("No files in infolder.")
             exit(-1)
 
+        self.images = ItemList(items=sorted(set(files)), size=(299, 299))
+
         self.outfolder = OUTFOLDER
         self.infolder = INFOLDER
         self.nocopy = NOCOPY
-
-        self._classified = 0
-        self._index = -1
-
-        self.size = (299, 299)
 
         # basic setup
         self.setup()
@@ -94,131 +131,114 @@ class AppTk(tk.Frame):
         self.parent.attributes("-topmost", True)
 
         # show first image
-        self.display_next()
+        self.display()
 
     @property
     def cur_file(self):
-        return self.filelist[self._index]
+        return self.images.current
 
     @property
     def no_classified(self):
-        cnt = 0
-        for d in digits:
-            if self.cur_file in self._class[f"c{d}"]:
-                cnt += len(self._class[f"c{d}"])
-        if self.cur_file in self._delete:
-            cnt += len(self._delete)
-        return cnt
+        return sum(1 for x in self.images.labels if x is not None)
 
     @property
     def no_total(self):
-        return len(self.filelist)
+        return len(self.images)
 
     @property
     def title(self):
         def get_class():
-            for d in digits:
-                if self.cur_file in self._class[f"c{d}"]:
-                    return f"[ {d} ] "
-            if self.cur_file in self._delete:
-                return "[ X ] "
-            return "[   ] "
+            label = self.images.current.label
+            if label is None:
+                label = " "
+            return f"[ {label} ] "
 
         stats = f"{self.no_classified}/{self.no_total}"
-        label = f"{self.cur_file.name} - {get_class()} ({stats})"
+        label = (
+            f"FastClass :: {self.cur_file.image_path.name} - {get_class()} ({stats})"
+        )
         return label
 
     def print_titlebar(self):
         self.parent.title(self.title)
 
+    def button_callback(self, button):
+        self.images.current.label = button
+        self.display_next()
+
     def callback(self, event=None):
         def button_action(char):
-            self._class[f"c{char}"].add(self.cur_file)
+            self.images.current.label = char
             self.display_next()
 
-        if event.keysym in digits:
-            button_action(event.keysym)
-        elif event.keysym == "space":  #'<space>':
+        e = event.keysym
+        if e in digits + "d":
+            button_action(e)
+        elif e == "space":  #'<space>':
             button_action("1")
-        elif event.keysym == "d":
-            self._delete.add(self.cur_file)
-            self.display_next()
-        elif event.keysym == "Left":  #'<Left>':
+        elif e == "Left":  #'<Left>':
             self.display_prev()
-        elif event.keysym == "Right":  #'<Right>':
+        elif e == "Right":  #'<Right>':
             self.display_next()
-        elif event.keysym == "x":
-
-            # write report file
-            rows_all, rows_clean = [], []
-            for f in self.filelist:
-                row = (f, "?")
-                for d in digits:
-                    if f in self._class[f"c{d}"]:
-                        row = (f, d)
-
-                if f in self._delete:
-                    row = (f, "D")
-                else:
-                    rows_clean.append(row)
-                rows_all.append(row)
-
-            for ftype, rows in zip(["all", "clean"], [rows_all, rows_clean]):
-                foutname = self.infolder.replace(" ", "_") + f"_report_{ftype}.csv"
-                with open(foutname, "w") as f:
-                    f.write("file;rank\n")
-                    for row in rows:
-                        f.write(";".join(row) + "\n")
-
-            if not self.nocopy:
-                for r in rows_clean:
-                    shutil.copy(r[0], self.outfolder)
-
-            self.parent.destroy()
+        elif e == "x":
+            self.save_and_exit()
         else:
             pass
 
+    def save_and_exit(self):
+        # write report file
+        rows_all, rows_clean = [], []
+        for f in self.images:
+            row = (f.image_path, f.label if f.label else "?")
+
+            if f.label is not "d":
+                rows_clean.append(row)
+            rows_all.append(row)
+
+        for ftype, rows in zip(["all", "clean"], [rows_all, rows_clean]):
+            foutname = Path(
+                str(self.infolder).replace(" ", "_") + f"_report_{ftype}.csv"
+            )
+            with open(foutname, "w") as f:
+                f.write("file;rank\n")
+                for row in sorted(rows, key=lambda x: x[0]):
+                    f.write(";".join([str(x) for x in row]) + "\n")
+
+        if not self.nocopy:
+            for r in rows_clean:
+                shutil.copy(r[0], self.outfolder)
+
+        self.parent.destroy()
+
     def setup(self):
-        self.Label = tk.Label(self)
-        self.Label.grid(row=0, column=0, columnspan=6, rowspan=6)  # , sticky=tk.N+tk.S)
-        self.Button1 = ttk.Button(self, text="Prev", command=self.display_prev)
-        self.Button1.grid(row=5, column=7, sticky=tk.S)
-        self.Button2 = ttk.Button(self, text="Next", command=self.display_next)
-        self.Button2.grid(row=5, column=8, sticky=tk.S)
+        self.Canvas = tk.Label(self)
+        self.Canvas.grid(row=0, column=0, columnspan=6, rowspan=6)
+        ttk.Button(self, text="Prev", command=self.display_prev).grid(row=4, column=6)
+        ttk.Button(self, text="Next", command=self.display_next).grid(row=4, column=7)
+        ttk.Button(self, text="Save & Exit", command=self.save_and_exit).grid(
+            row=5, column=6, columnspan=2
+        )
+
+        self.lfdata = ttk.Labelframe(self, padding=(2, 2, 4, 4), text="Selection")
+        self.lfdata.grid(row=0, column=6, columnspan=2, sticky="ne")
+        for i, item in enumerate(digits + "d"):
+            ttk.Button(
+                self.lfdata, text=item, command=partial(self.button_callback, item)
+            ).grid(in_=self.lfdata, column=6 + i % 2, row=i // 2, sticky="w")
+
+    def display(self):
+        photoimage = self.images.current.show()
+        self.Canvas.config(image=photoimage)
+        self.Canvas.image = photoimage
+        self.print_titlebar()
 
     def display_next(self):
-        self.print_titlebar()
-        self._index += 1
-        try:
-            f = self.cur_file
-        except IndexError:
-            self._index = -1  # go back to the beginning of the list.
-            self.display_next()
-            return
-
-        padded_im = image_pad(f, self.size)
-
-        photoimage = ImageTk.PhotoImage(padded_im)
-        self.Label.config(image=photoimage)
-        self.Label.image = photoimage
-        self.print_titlebar()
+        self.images.forward()
+        self.display()
 
     def display_prev(self):
-
-        self._index -= 1
-        try:
-            f = self.cur_file
-        except IndexError:
-            self._index = -1  # go back to the beginning of the list.
-            self.display_next()
-            return
-
-        padded_im = image_pad(f, self.size)
-
-        photoimage = ImageTk.PhotoImage(padded_im)
-        self.Label.config(image=photoimage)
-        self.Label.image = photoimage
-        self.print_titlebar()
+        self.images.backward()
+        self.display()
 
 
 def main(INFOLDER, OUTFOLDER, nocopy):
@@ -227,7 +247,8 @@ def main(INFOLDER, OUTFOLDER, nocopy):
 
     app = AppTk(root, infolder=INFOLDER, outfolder=OUTFOLDER, nocopy=nocopy)
 
-    app.grid(row=0, column=0)
+    app.grid(row=0, column=0, columnspan=8, rowspan=6)
+    app.configure(background="gray90")
 
     # start event loop
     root.lift()
