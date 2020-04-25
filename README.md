@@ -62,6 +62,8 @@ Column 1 contains the search terms. You can specify multiple searchterms using s
 Once downloaded use **fcc** to quickly inspect the loaded files and rate or
 classify them. You can also mark them for deletion.
 
+![FastClass cleaner: fcc](assets/fcc_screenshot.png)
+
 ### Usage
 
 Call the script from the commandline. If you omit any input parameters it
