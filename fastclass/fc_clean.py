@@ -8,6 +8,7 @@ import click
 import glob
 import itertools as it
 import os
+from pathlib import Path
 from PIL import ImageTk, Image
 import tkinter as tk
 from tkinter import ttk
@@ -45,12 +46,14 @@ digits = "123456789"
 class AppTk(tk.Frame):
     def __init__(self, parent, **kwargs):
 
-        INFOLDER = kwargs["infolder"]
+        INFOLDER = Path(kwargs["infolder"])
         OUTFOLDER = kwargs["outfolder"]
 
         if OUTFOLDER is None:
-            OUTFOLDER = INFOLDER + ".clean"
-            os.makedirs(OUTFOLDER, exist_ok=True)
+            OUTFOLDER = INFOLDER.parent / (INFOLDER.name + ".clean")
+            OUTFOLDER.mkdir(exist_ok=True)
+        else:
+            OUTFOLDER = Path(OUTFOLDER)
 
         NOCOPY = kwargs["nocopy"]
 
@@ -67,7 +70,7 @@ class AppTk(tk.Frame):
         self._class = {f"c{d}": set() for d in digits}
         self._delete = set()
 
-        files = list(it.chain(*[glob.glob(f"{INFOLDER}/*.{x}") for x in suffixes]))
+        files = list(it.chain(*[INFOLDER.glob(f"*.{x}") for x in suffixes]))
 
         self.filelist = sorted(set(files))
         if len(self.filelist) == 0:
@@ -121,12 +124,9 @@ class AppTk(tk.Frame):
                 return "[ X ] "
             return "[   ] "
 
-        return (
-            os.path.basename(self.cur_file)
-            + " - "
-            + get_class()
-            + f" ({self.no_classified}/{self.no_total})"
-        )
+        stats = f"{self.no_classified}/{self.no_total}"
+        label = f"{self.cur_file.name} - {get_class()} ({stats})"
+        return label
 
     def print_titlebar(self):
         self.parent.title(self.title)
