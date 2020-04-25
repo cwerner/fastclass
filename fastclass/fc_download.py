@@ -24,6 +24,7 @@ import tempfile
 from typing import List, Dict
 
 from .deduplicate import remove_dups
+from .googleparserfix import GoogleParser
 from .imageprocessing import resize
 from .misc import sanitize_searchstring
 
@@ -68,6 +69,7 @@ def crawl(
         if c == "GOOGLE":
             google_crawler = GoogleImageCrawler(
                 downloader_cls=CustomDownloader,
+                parser_cls=GoogleParser,
                 log_level=logging.CRITICAL,
                 feeder_threads=1,
                 parser_threads=1,
