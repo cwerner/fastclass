@@ -15,7 +15,7 @@ The package currently contains the follwing tools:
 
 ## Download images
 
-Use **fcd** to crawl search engines (Google, Bing, Baidu) and pull all images for
+Use **fcd** to crawl search engines (Google, Bing, Baidu, Flickr) and pull all images for
 a defined set of queries. In addition, files are renamed, scaled and checked
 for duplicates.
 
