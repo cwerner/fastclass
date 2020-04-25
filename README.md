@@ -1,7 +1,10 @@
-# fastclass
+# FastClass
 
-![https://img.shields.io/github/v/release/cwerner/fastclass.svg]
-![https://img.shields.io/badge/code%20style-black-000000.svg](https://github.com/python/black)
+![Version](https://img.shields.io/github/v/release/cwerner/fastclass.svg)
+![Python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue)
+![Style](https://img.shields.io/badge/code%20style-black-000000.svg)
+![GitHub stars](https://img.shields.io/github/stars/cwerner/fastclass?style=social)
+
 
 A little set of tools to batch download images and weed through, delete and
 classify them into groups for building deep learning image datasets.
