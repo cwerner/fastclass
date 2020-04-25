@@ -164,12 +164,8 @@ class AppTk(tk.Frame):
                 rows_all.append(row)
 
             for ftype, rows in zip(["all", "clean"], [rows_all, rows_clean]):
-                with open(
-                    os.path.join(
-                        self.infolder.replace(" ", "_") + "_report_%s.csv" % ftype
-                    ),
-                    "w",
-                ) as f:
+                foutname = self.infolder.replace(" ", "_") + f"_report_{ftype}.csv"
+                with open(foutname, "w") as f:
                     f.write("file;rank\n")
                     for row in rows:
                         f.write(";".join(row) + "\n")
