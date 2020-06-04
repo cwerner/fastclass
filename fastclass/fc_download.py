@@ -120,7 +120,8 @@ def crawl(
             flick_api_key = os.environ.get("FLICKR_API_KEY")
             if not flick_api_key:
                 print(
-                    "Error: Flickr crawler requires FLICKR_API_KEY environment variable to be set with your non-secret API key."
+                    "Error: Flickr crawler requires FLICKR_API_KEY environment variable"
+                    " to be set with your non-secret API key."
                 )
                 exit(-1)
 
@@ -145,18 +146,16 @@ def crawl(
 def main(
     infile: str, size: int, crawler: List[str], keep: bool, maxnum: int, outpath: str
 ):
-    SIZE = (size, size)
-    classes = []
-
     if "ALL" in crawler:
         crawler = ["GOOGLE", "BING"]
 
     if os.path.isdir(outpath):
         print(
-            f'Directory "{outpath}" exists. Would you like to overwrite the directory? [y/n]'
+            f'Directory "{outpath}" exists. Would you like to overwrite the directory?'
+            " [y/n]"
         )
         choice = input().lower()
-        while not (choice == "y" or "n"):
+        while choice != "y" and not "n":
             print("Please reply with 'y' or 'n'")
             choice = input().lower()
         if choice == "y":
@@ -170,6 +169,8 @@ def main(
     print(f"INFO: final dataset will be located in {outpath}")
 
     with tempfile.TemporaryDirectory() as tmp:
+        classes = []
+
         for lcnt, line in enumerate(infile):
             if lcnt > 0:
                 no_cols = line[:-1].count(",") + 1
@@ -180,6 +181,7 @@ def main(
                     remove_terms = None
                 classes.append((search_term, remove_terms))
 
+        SIZE = (size, size)
         for i, (search_term, remove_terms) in enumerate(classes):
             print(f"[{i+1}/{len(classes)}] Searching: >> {search_term} <<")
             out_name = sanitize_searchstring(search_term, rstring=remove_terms)
