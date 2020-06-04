@@ -66,41 +66,6 @@ def crawl(
 
     for c in crawlers:
         print(f"    -> {c}")
-        if c == "GOOGLE":
-            google_crawler = GoogleImageCrawler(
-                downloader_cls=CustomDownloader,
-                parser_cls=GoogleParser,
-                log_level=logging.CRITICAL,
-                feeder_threads=1,
-                parser_threads=1,
-                downloader_threads=4,
-                storage={"root_dir": folder},
-            )
-
-            google_crawler.crawl(
-                keyword=search,
-                offset=0,
-                max_num=maxnum,
-                min_size=(200, 200),
-                max_size=None,
-                file_idx_offset=0,
-            )
-
-        if c == "BING":
-            bing_crawler = BingImageCrawler(
-                downloader_cls=CustomDownloader,
-                log_level=logging.CRITICAL,
-                downloader_threads=4,
-                storage={"root_dir": folder},
-            )
-            bing_crawler.crawl(
-                keyword=search,
-                filters=None,
-                offset=0,
-                max_num=maxnum,
-                file_idx_offset="auto",
-            )
-
         if c == "BAIDU":
             baidu_crawler = BaiduImageCrawler(
                 downloader_cls=CustomDownloader,
@@ -116,7 +81,22 @@ def crawl(
                 file_idx_offset="auto",
             )
 
-        if c == "FLICKR":
+        elif c == "BING":
+            bing_crawler = BingImageCrawler(
+                downloader_cls=CustomDownloader,
+                log_level=logging.CRITICAL,
+                downloader_threads=4,
+                storage={"root_dir": folder},
+            )
+            bing_crawler.crawl(
+                keyword=search,
+                filters=None,
+                offset=0,
+                max_num=maxnum,
+                file_idx_offset="auto",
+            )
+
+        elif c == "FLICKR":
             flick_api_key = os.environ.get("FLICKR_API_KEY")
             if not flick_api_key:
                 print(
@@ -138,6 +118,26 @@ def crawl(
                 min_size=(200, 200),
                 max_size=None,
                 file_idx_offset="auto",
+            )
+
+        elif c == "GOOGLE":
+            google_crawler = GoogleImageCrawler(
+                downloader_cls=CustomDownloader,
+                parser_cls=GoogleParser,
+                log_level=logging.CRITICAL,
+                feeder_threads=1,
+                parser_threads=1,
+                downloader_threads=4,
+                storage={"root_dir": folder},
+            )
+
+            google_crawler.crawl(
+                keyword=search,
+                offset=0,
+                max_num=maxnum,
+                min_size=(200, 200),
+                max_size=None,
+                file_idx_offset=0,
             )
 
     return {k: v for k, v in CustomDownloader.registry.items() if k is not None}
